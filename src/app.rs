@@ -1,6 +1,11 @@
 use macroquad::prelude::*;
 
-use crate::arcade_text::{self, TextDrawer};
+use crate::{
+    arcade_text::{self, TextDrawer},
+    block::{BlockDrawer, BlockVariant},
+};
+
+const FONT_PATH: &str = "res/graphics/font_big.png";
 
 pub struct App {
     text_drawer: TextDrawer,
@@ -8,7 +13,7 @@ pub struct App {
 
 impl App {
     pub async fn new() -> Self {
-        let text = load_texture("asset/font.png").await.unwrap();
+        let text = load_texture(FONT_PATH).await.unwrap();
         let text_drawer = TextDrawer::new(text);
         text.set_filter(FilterMode::Nearest);
         // build_textures_atlas();
@@ -16,28 +21,27 @@ impl App {
     }
 
     pub async fn run(&mut self) {
+        let img = load_image("res/graphics/blockskin/big/b0.png")
+            .await
+            .unwrap();
+        let drawer = BlockDrawer::new(img);
+
         loop {
             clear_background(Color::from_rgba(10, 10, 10, 255));
 
             Self::setup_camera();
-
-            draw_cube(
+            drawer.draw_block(
+                BlockVariant::PURPLE,
                 Vec3 {
-                    x: 20.,
+                    x: -50.,
                     y: 0.,
                     z: 0.,
                 },
-                Vec3 {
-                    x: 10.,
-                    y: 10.0,
-                    z: 10.0,
-                },
-                None,
-                Color::from_rgba(255, 0, 0, 255),
+                20.0,
             );
 
             self.text_drawer
-                .draw_text("ASDaE", Vec2::ZERO, arcade_text::Color::MAGENTA);
+                .draw_text("A", Vec2::ZERO, arcade_text::Color::RED);
             next_frame().await
         }
     }
@@ -51,7 +55,6 @@ impl App {
             },
             target: Vec3::ZERO,
             up: -Vec3::Y,
-            projection: Projection::Perspective,
             ..Default::default()
         });
     }
