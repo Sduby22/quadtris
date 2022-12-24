@@ -151,6 +151,7 @@ fn get_piece_size(piece: PieceType) -> (isize, isize) {
     }
 }
 
+#[derive(Clone)]
 pub struct PieceWithPosition {
     r: isize,
     c: isize,

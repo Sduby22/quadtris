@@ -3,10 +3,12 @@ use crate::game_data::GameData;
 use macroquad::prelude::*;
 
 use self::board::render_board;
+use self::material::use_custom_material;
 use self::score::render_score;
 
 mod block;
 mod board;
+mod material;
 mod score;
 mod text;
 mod utils;

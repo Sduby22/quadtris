@@ -39,8 +39,6 @@ impl BlockRenderer {
             text,
             Color::from_rgba(255, 255, 255, 255),
         );
-
-        gl_use_default_material();
     }
 
     fn get_texture(&self, variant: BlockVariant) -> Texture2D {

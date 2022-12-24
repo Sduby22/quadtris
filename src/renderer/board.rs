@@ -8,6 +8,7 @@ use rust_tetris_core::{
 
 use super::{
     block::{self, BlockRenderer, BlockVariant},
+    material::use_custom_material,
     text::{self, TextRenderer},
     utils::{pop_model_matrix, push_model_matrix},
 };
@@ -21,14 +22,29 @@ pub fn render_board(
 ) {
     let board = &game_data.board;
     push_model_matrix(Mat4::from_translation(pos));
-    render_frame(20, 10, BLOCK_SIZE);
 
     render_board_blocks(board, block_renderer);
+    render_curr_piece(game_data, block_renderer);
+    render_ghost_piece(game_data, block_renderer);
+
     render_next(game_data, text_renderer, block_renderer);
     render_hold(game_data, text_renderer, block_renderer);
-    render_curr_piece(game_data, block_renderer);
+
+    render_frame(20, 10, BLOCK_SIZE);
 
     pop_model_matrix();
+}
+
+fn render_ghost_piece(game_data: &GameData, block_renderer: &BlockRenderer) {
+    use_custom_material();
+    if let Some(mut p) = game_data.curr_piece.clone() {
+        while !p.collides_down(&game_data.board) {
+            p.move_down();
+        }
+
+        render_tetrimino(&p, block_renderer);
+    }
+    gl_use_default_material();
 }
 
 fn render_curr_piece(game_data: &GameData, block_renderer: &BlockRenderer) {
