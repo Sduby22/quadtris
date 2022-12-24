@@ -7,3 +7,8 @@ edition = "2021"
 
 [dependencies]
 macroquad = "0.3.25"
+egui-macroquad = "0.12.0"
+rust_tetris_core = { path = "rust_tetris_core" }
+
+[workspace]
+members = ['rust_tetris_core']

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::f32::consts::PI;
 
 use macroquad::prelude::*;
 
@@ -16,16 +16,16 @@ pub enum Color {
     NAVYBLUE,
 }
 
-pub struct TextDrawer {
+pub struct TextRenderer {
     text: Texture2D,
 }
 
-impl TextDrawer {
+impl TextRenderer {
     pub fn new(text: Texture2D) -> Self {
-        TextDrawer { text }
+        TextRenderer { text }
     }
 
-    pub fn draw_text(&self, text: &str, position: Vec2, color: Color) {
+    pub fn draw_text(&self, text: &str, position: Vec2, size: f32, color: Color) {
         let mut x = position.x;
         let y = position.y;
         for c in text.chars() {
@@ -38,12 +38,12 @@ impl TextDrawer {
             }
 
             let glyph_code = code - 32;
-            self.draw_character(glyph_code, color, Vec2 { x, y });
-            x += 32.;
+            self.draw_character(glyph_code, Vec2 { x, y }, size, color);
+            x += size;
         }
     }
 
-    fn draw_character(&self, variant: usize, color: Color, position: Vec2) {
+    fn draw_character(&self, variant: usize, position: Vec2, size: f32, color: Color) {
         let row = color as usize * 3 + variant / 32;
         let col = variant % 32;
 
@@ -62,6 +62,9 @@ impl TextDrawer {
                     w: 32.,
                     h: 32.,
                 }),
+                dest_size: Some(Vec2 { x: size, y: size }),
+                flip_x: false,
+                flip_y: true,
                 ..Default::default()
             },
         )

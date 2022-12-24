@@ -1,9 +1,7 @@
-use macroquad::prelude::*;
-
-use arcade_text::TextDrawer;
 mod app;
-mod arcade_text;
-mod block;
+mod constants;
+mod game_data;
+mod renderer;
 
 #[macroquad::main("Tetris")]
 async fn main() {

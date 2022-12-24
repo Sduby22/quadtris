@@ -1,4 +1,4 @@
-use macroquad::prelude::*;
+use macroquad::{miniquad::CullFace, prelude::*};
 
 #[derive(Clone, Copy)]
 pub enum BlockVariant {
@@ -15,12 +15,11 @@ pub enum BlockVariant {
     PURPLE,
 }
 
-pub struct BlockDrawer {
-    block_img: Image,
+pub struct BlockRenderer {
     textures: Vec<Texture2D>,
 }
 
-impl BlockDrawer {
+impl BlockRenderer {
     pub fn new(block_img: Image) -> Self {
         let mut textures = vec![];
         for i in 0..9 {
@@ -29,10 +28,7 @@ impl BlockDrawer {
             t.set_filter(FilterMode::Nearest);
             textures.push(t);
         }
-        Self {
-            block_img,
-            textures,
-        }
+        Self { textures }
     }
 
     pub fn draw_block(&self, variant: BlockVariant, position: Vec3, size: f32) {
@@ -42,7 +38,9 @@ impl BlockDrawer {
             Vec3::new(size, size, size),
             text,
             Color::from_rgba(255, 255, 255, 255),
-        )
+        );
+
+        gl_use_default_material();
     }
 
     fn get_texture(&self, variant: BlockVariant) -> Texture2D {

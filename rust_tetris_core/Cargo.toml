@@ -1,0 +1,15 @@
+[package]
+name = "rust_tetris_core"
+version = "0.1.0"
+authors = ["Davide Canton <davide.canton5@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+log = "0.4.11"
+lazy_static = "1.4.0"
+enum_derive = "0.1.7" 
+custom_derive = "0.1.7"
+rand = "0.8.4"
+
+[dev-dependencies]
+test-case = "2.0.2"
