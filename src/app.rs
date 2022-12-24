@@ -130,8 +130,9 @@ impl App {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
 
         if is_key_pressed(self.game_data.keybind.rotate_cw) {
+            piece.try_rotate(&self.game_data.board);
         } else if is_key_pressed(self.game_data.keybind.rotate_ccw) {
-            piece.try_rotate_right(&self.game_data.board);
+            piece.try_rotate_prev(&self.game_data.board);
         }
     }
 

@@ -1,5 +1,3 @@
-use std::f32::consts::PI;
-
 use macroquad::prelude::*;
 
 #[derive(Clone, Copy)]

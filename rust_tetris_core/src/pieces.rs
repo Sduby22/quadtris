@@ -231,7 +231,7 @@ impl PieceWithPosition {
     }
 
     pub fn kick_by(&mut self, kick: &Kick) {
-        self.r -= kick.1;
+        self.r += kick.1;
         self.c += kick.0;
     }
 
@@ -240,6 +240,32 @@ impl PieceWithPosition {
             .get_kicks(prev_rot)
             .iter()
             .find(|&kick| !self.collides_kick(matrix, kick))
+    }
+
+    pub fn try_rotate(&mut self, matrix: &Board) -> bool {
+        let prev = self.piece.rotation;
+        self.piece.rotate_piece();
+
+        if let Some(k) = self.rotate_and_kick(prev, matrix) {
+            self.kick_by(k);
+            true
+        } else {
+            self.piece.rotate_piece_prev();
+            false
+        }
+    }
+
+    pub fn try_rotate_prev(&mut self, matrix: &Board) -> bool {
+        let prev = self.piece.rotation;
+        self.piece.rotate_piece_prev();
+
+        if let Some(k) = self.rotate_and_kick(prev, matrix) {
+            self.kick_by(k);
+            true
+        } else {
+            self.piece.rotate_piece();
+            false
+        }
     }
 
     pub fn move_down(&mut self) {

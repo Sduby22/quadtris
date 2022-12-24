@@ -87,8 +87,8 @@ impl GameData {
             soft_drop_gravity: 40.,
             accumulated_down: 0.,
 
-            freeze_delay: 30.,
-            freeze_left: 30.,
+            freeze_delay: 120.,
+            freeze_left: 120.,
 
             das: 6.,
             das_left: 6.,
