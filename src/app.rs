@@ -62,6 +62,7 @@ impl App {
                     self.handle_rotate();
                     self.handle_gravity();
                     self.handle_freeze();
+                    self.handle_clear();
                 } else if let Some(p) = self.spawn_piece() {
                     self.game_data.curr_piece = Some(p);
                 } else {
@@ -138,7 +139,7 @@ impl App {
                 .game_data
                 .hold_piece
                 .take()
-                .map_or(None, |p| self.init_piece(p.piece));
+                .map_or(self.spawn_piece(), |p| self.init_piece(p.piece));
 
             let mut hp = HoldPiece::new(piece.tetris_piece());
             hp.set_hold();
@@ -196,6 +197,16 @@ impl App {
         } else {
             self.game_data.das_left -= relative_frame();
         }
+    }
+
+    fn handle_clear(&mut self) {
+        let board = &mut self.game_data.board;
+        let ranges = board.completed_rows();
+        for (from, to) in ranges.iter() {
+            self.game_data.lines += (from - to) as u32;
+        }
+
+        board.remove_ranges(ranges);
     }
 
     fn clear_das(&mut self) {
