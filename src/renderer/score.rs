@@ -14,25 +14,25 @@ pub fn render_score(game_data: &GameData, pos: Vec2, text_renderer: &TextRendere
         z: 0.,
     }));
 
-    text_renderer.draw_text("LINES", Vec2::ZERO, FONT_SIZE, text::Color::NAVYBLUE);
+    text_renderer.draw_text("LINES", Vec2::ZERO, FONT_SIZE, text::Color::Navyblue);
     text_renderer.draw_text(
         &game_data.lines.to_string(),
         Vec2::Y * -FONT_SIZE,
         FONT_SIZE,
-        text::Color::WHITE,
+        text::Color::White,
     );
 
     text_renderer.draw_text(
         "TIME",
         Vec2::Y * FONT_SIZE * -3.,
         FONT_SIZE,
-        text::Color::NAVYBLUE,
+        text::Color::Navyblue,
     );
     text_renderer.draw_text(
         &time_to_string(game_data.time),
         Vec2::Y * FONT_SIZE * -4.,
         FONT_SIZE,
-        text::Color::WHITE,
+        text::Color::White,
     );
 
     pop_model_matrix();

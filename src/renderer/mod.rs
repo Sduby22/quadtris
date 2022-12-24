@@ -3,7 +3,6 @@ use crate::game_data::GameData;
 use macroquad::prelude::*;
 
 use self::board::render_board;
-use self::material::use_custom_material;
 use self::score::render_score;
 
 mod block;
@@ -70,13 +69,5 @@ impl Renderer {
             up: Vec3::Y,
             ..Default::default()
         });
-    }
-
-    pub fn draw_block(&self, variant: block::BlockVariant, position: Vec3, size: f32) {
-        self.block_renderer.draw_block(variant, position, size);
-    }
-
-    pub fn draw_text(&self, text: &str, position: Vec2, size: f32, color: text::Color) {
-        self.text_renderer.draw_text(text, position, size, color);
     }
 }

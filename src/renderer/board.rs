@@ -3,12 +3,11 @@ use macroquad::prelude::*;
 use rust_tetris_core::{
     board::{Board, Cell},
     enums::{PieceType, PieceTypeColor},
-    pieces::{Piece, PieceWithPosition},
+    pieces::PieceWithPosition,
 };
 
 use super::{
-    block::{self, BlockRenderer, BlockVariant},
-    material::use_custom_material,
+    block::{BlockRenderer, BlockVariant},
     text::{self, TextRenderer},
     utils::{pop_model_matrix, push_model_matrix},
 };
@@ -61,7 +60,7 @@ fn render_next(game_data: &GameData, text_renderer: &TextRenderer, block_rendere
             y: BLOCK_SIZE * 2.,
         },
         FONT_SIZE,
-        text::Color::YELLOW,
+        text::Color::Yellow,
     );
 
     let (mut dx, mut dy) = (1, -1);
@@ -105,7 +104,7 @@ fn render_hold(game_data: &GameData, text_renderer: &TextRenderer, block_rendere
             y: BLOCK_SIZE * 2.,
         },
         FONT_SIZE,
-        text::Color::YELLOW,
+        text::Color::Yellow,
     );
 
     if let Some(hp) = &game_data.hold_piece {
@@ -180,15 +179,15 @@ fn render_cell(cell: &Cell, position: Vec3, block_renderer: &BlockRenderer) {
     if let Cell::Filled(piece) = cell {
         let variant = match piece {
             PieceTypeColor::Playable(piece_type) => match piece_type {
-                PieceType::T => BlockVariant::PURPLE,
-                PieceType::L => BlockVariant::BLUE,
-                PieceType::J => BlockVariant::ORANGE,
-                PieceType::S => BlockVariant::GREEN,
-                PieceType::Z => BlockVariant::RED,
-                PieceType::O => BlockVariant::YELLOW,
-                PieceType::I => BlockVariant::CYAN,
+                PieceType::T => BlockVariant::Purple,
+                PieceType::L => BlockVariant::Blue,
+                PieceType::J => BlockVariant::Orange,
+                PieceType::S => BlockVariant::Green,
+                PieceType::Z => BlockVariant::Red,
+                PieceType::O => BlockVariant::Yellow,
+                PieceType::I => BlockVariant::Cyan,
             },
-            PieceTypeColor::NotPlayable => BlockVariant::GRAY,
+            PieceTypeColor::NotPlayable => BlockVariant::Gray,
         };
 
         block_renderer.draw_block(variant, position, BLOCK_SIZE);

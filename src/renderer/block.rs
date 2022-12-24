@@ -1,18 +1,19 @@
-use macroquad::{miniquad::CullFace, prelude::*};
+use macroquad::prelude::*;
 
 #[derive(Clone, Copy)]
+#[allow(dead_code)]
 pub enum BlockVariant {
-    GRAY,
-    WHITE,
+    Gray,
+    White,
 
     // 7 tetrimino variants
-    RED,
-    ORANGE,
-    YELLOW,
-    GREEN,
-    CYAN,
-    BLUE,
-    PURPLE,
+    Red,
+    Orange,
+    Yellow,
+    Green,
+    Cyan,
+    Blue,
+    Purple,
 }
 
 pub struct BlockRenderer {

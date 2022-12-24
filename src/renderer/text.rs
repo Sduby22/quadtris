@@ -1,17 +1,18 @@
 use macroquad::prelude::*;
 
 #[derive(Clone, Copy)]
+#[allow(dead_code)]
 pub enum Color {
-    WHITE,
-    BLUE,
-    RED,
-    MAGENTA,
-    GREEN,
-    CREAM,
-    CYAN,
-    YELLOW,
-    PURPLE,
-    NAVYBLUE,
+    White,
+    Blue,
+    Red,
+    Magenta,
+    Green,
+    Cream,
+    Cyan,
+    Yellow,
+    Purple,
+    Navyblue,
 }
 
 pub struct TextRenderer {

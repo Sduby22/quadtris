@@ -1,16 +1,3 @@
-macro_rules! rotations {
-    ($rot:expr, Z => $z:expr, R => $r:expr, T => $t:expr, L => $l:expr) => {{
-        use Rotation::*;
-        let r = match $rot {
-            R0 => $z,
-            R90 => $r,
-            R180 => $t,
-            R270 => $l,
-        };
-        Vec::from(r)
-    }};
-}
-
 #[macro_export]
 macro_rules! piece {
     (

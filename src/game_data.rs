@@ -1,9 +1,5 @@
 use rust_tetris_core::{
-    board::Board,
-    enums::PieceType,
-    holder::HoldPiece,
-    piece_bag::PieceBag,
-    pieces::{Piece, PieceWithPosition},
+    board::Board, holder::HoldPiece, piece_bag::PieceBag, pieces::PieceWithPosition,
 };
 
 use macroquad::prelude::*;

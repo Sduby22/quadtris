@@ -5,7 +5,6 @@ use rust_tetris_core::{
 };
 
 use crate::{
-    constants::FPS,
     game_data::{GameData, GameState, MoveState},
     renderer::Renderer,
 };
@@ -206,12 +205,6 @@ impl App {
         }
 
         board.remove_ranges(ranges);
-    }
-
-    fn clear_das(&mut self) {
-        self.game_data.move_state = MoveState::No;
-        self.game_data.das_left = self.game_data.das;
-        self.game_data.accumulated_move = 0.;
     }
 
     fn spawn_piece(&mut self) -> Option<PieceWithPosition> {
