@@ -7,10 +7,12 @@ pub enum Cell {
     Empty,
 }
 
-pub fn is_filled(cell: Cell) -> bool {
-    match cell {
-        Cell::Filled(_) => true,
-        Cell::Empty => false,
+impl Cell {
+    pub fn is_filled(&self) -> bool {
+        match self {
+            Cell::Filled(_) => true,
+            Cell::Empty => false,
+        }
     }
 }
 
@@ -58,7 +60,7 @@ impl Board {
         if !self.is_in_bounds(i, j) {
             false
         } else {
-            is_filled(self.data[i as usize][j as usize])
+            self.data[i as usize][j as usize].is_filled()
         }
     }
 
@@ -79,13 +81,13 @@ impl Board {
     }
 
     pub fn is_complete(&self, i: isize) -> bool {
-        self.data[i as usize].iter().all(|&cell| is_filled(cell))
+        self.data[i as usize].iter().all(|&cell| cell.is_filled())
     }
 
     pub fn is_empty(&self) -> bool {
         self.data
             .iter()
-            .all(|row| row.iter().all(|&cell| !is_filled(cell)))
+            .all(|row| row.iter().all(|&cell| !cell.is_filled()))
     }
 
     pub fn completed_rows(&mut self) -> Vec<(isize, isize)> {
@@ -202,7 +204,7 @@ mod tests {
     #[test_case(Cell::Filled(PieceTypeColor::Playable(PieceType::I)), true; "when cell is filled with playable")]
     #[test_case(Cell::Empty, false; "when cell is empty")]
     fn test_is_filled(cell: Cell, expected: bool) {
-        assert_eq!(is_filled(cell), expected)
+        assert_eq!(cell.is_filled(), expected)
     }
 
     #[test]
@@ -267,7 +269,7 @@ mod tests {
         load_board(&mut board, "***************");
         board.clear_all();
 
-        assert!(board.data.iter().all(|r| r.iter().all(|c| !is_filled(*c))));
+        assert!(board.data.iter().all(|r| r.iter().all(|c| !c.is_filled())));
     }
 
     #[test]
@@ -282,9 +284,9 @@ mod tests {
         for i in 0..5 {
             for j in 0..3 {
                 if i == 0 && j == 1 {
-                    assert!(is_filled(board.get(i, j)));
+                    assert!(board.get(i, j).is_filled());
                 } else {
-                    assert!(!is_filled(board.get(i, j)));
+                    assert!(!board.get(i, j).is_filled());
                 }
             }
         }
@@ -301,7 +303,7 @@ mod tests {
 
         for i in 0..5 {
             for j in 0..3 {
-                assert!(!is_filled(board.get(i, j)));
+                assert!(!board.get(i, j).is_filled());
             }
         }
     }

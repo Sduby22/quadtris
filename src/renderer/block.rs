@@ -41,6 +41,14 @@ impl BlockRenderer {
         );
     }
 
+    pub fn draw_wire_block(&self, position: Vec3, size: f32) {
+        draw_cube_wires(
+            position,
+            Vec3::new(size, size, size),
+            Color::from_rgba(255, 255, 255, 255),
+        );
+    }
+
     fn get_texture(&self, variant: BlockVariant) -> Texture2D {
         self.textures[variant as usize]
     }

@@ -134,11 +134,11 @@ impl App {
         if is_key_pressed(self.game_data.keybind.hold) && self.game_data.hold_piece.can_swap() {
             let Some(piece) = self.game_data.curr_piece.take() else { return };
 
-            self.game_data.curr_piece = self
-                .game_data
-                .hold_piece
-                .take()
-                .map_or(self.spawn_piece(), |p| self.init_piece(p.piece));
+            self.game_data.curr_piece = if let Some(p) = self.game_data.hold_piece.take() {
+                self.init_piece(p.piece)
+            } else {
+                self.spawn_piece()
+            };
 
             let mut hp = HoldPiece::new(piece.tetris_piece());
             hp.set_hold();

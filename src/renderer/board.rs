@@ -36,15 +36,13 @@ pub fn render_board(
 }
 
 fn render_ghost_piece(game_data: &GameData, block_renderer: &BlockRenderer) {
-    use_custom_material();
     if let Some(mut p) = game_data.curr_piece.clone() {
         while !p.collides_down(&game_data.board) {
             p.move_down();
         }
 
-        render_tetrimino(&p, block_renderer);
+        render_tetrimino_wire(&p, block_renderer);
     }
-    gl_use_default_material();
 }
 
 fn render_curr_piece(game_data: &GameData, block_renderer: &BlockRenderer) {
@@ -137,6 +135,27 @@ fn render_board_blocks(board: &Board, block_renderer: &BlockRenderer) {
     });
 }
 
+fn render_board_blocks_wire(board: &Board, block_renderer: &BlockRenderer) {
+    board
+        .rows()
+        .flatten()
+        .enumerate()
+        .filter(|(_, cell)| cell.is_filled())
+        .for_each(|(ind, _)| {
+            let x = ind % board.cols as usize;
+            let y = ind / board.cols as usize;
+
+            block_renderer.draw_wire_block(
+                Vec3 {
+                    x: BLOCK_SIZE * x as f32,
+                    y: BLOCK_SIZE * y as f32,
+                    z: 0.,
+                },
+                BLOCK_SIZE,
+            );
+        });
+}
+
 fn render_tetrimino(tetrimino: &PieceWithPosition, block_renderer: &BlockRenderer) {
     push_model_matrix(Mat4::from_translation(Vec3 {
         x: tetrimino.col() as f32 * BLOCK_SIZE,
@@ -144,6 +163,16 @@ fn render_tetrimino(tetrimino: &PieceWithPosition, block_renderer: &BlockRendere
         z: 0.,
     }));
     render_board_blocks(&tetrimino.tetris_piece_ref().board, block_renderer);
+    pop_model_matrix();
+}
+
+fn render_tetrimino_wire(tetrimino: &PieceWithPosition, block_renderer: &BlockRenderer) {
+    push_model_matrix(Mat4::from_translation(Vec3 {
+        x: tetrimino.col() as f32 * BLOCK_SIZE,
+        y: tetrimino.row() as f32 * BLOCK_SIZE,
+        z: 0.,
+    }));
+    render_board_blocks_wire(&tetrimino.tetris_piece_ref().board, block_renderer);
     pop_model_matrix();
 }
 
