@@ -109,7 +109,7 @@ impl GameData {
 
     pub fn start(&mut self) {
         self.state = GameState::Playing;
-        self.piece_bag = Some(PieceBag::new(6, None));
+        self.piece_bag = Some(PieceBag::new(6, Some((get_time() * 1000.) as u64)));
         self.gravity = 0.0156;
     }
 }

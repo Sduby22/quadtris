@@ -64,10 +64,20 @@ impl App {
                 } else if let Some(p) = self.spawn_piece() {
                     self.game_data.curr_piece = Some(p);
                 } else {
-                    self.game_data.state = GameState::GameOver;
+                    self.game_over();
                 }
             }
-            GameState::GameOver => todo!(),
+            GameState::GameOver => {
+                if is_key_pressed(self.game_data.keybind.restart) {
+                    self.game_restart();
+                    return;
+                }
+
+                if is_key_pressed(self.game_data.keybind.escape) {
+                    self.game_stop();
+                    return;
+                }
+            }
         }
     }
 
@@ -246,6 +256,10 @@ impl App {
         self.game_data.state = GameState::Menu;
     }
 
+    fn game_over(&mut self) {
+        self.game_data.state = GameState::GameOver;
+    }
+
     fn game_restart(&mut self) {
         self.game_data.clear();
         self.game_data.start();
@@ -254,7 +268,7 @@ impl App {
     fn game_start(&mut self) {
         self.game_data.start();
     }
-    //
+
     // fn draw_ui(&mut self) {
     //     egui_macroquad::ui(|egui_ctx| {
     //         egui_macroquad::egui::Window::new("egui ❤ macroquad").show(egui_ctx, |ui| {
