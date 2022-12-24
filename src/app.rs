@@ -1,5 +1,8 @@
 use macroquad::{logging, prelude::*};
-use rust_tetris_core::pieces::PieceWithPosition;
+use rust_tetris_core::{
+    holder::{HoldPiece, Swappable},
+    pieces::{Piece, PieceWithPosition},
+};
 
 use crate::{
     constants::FPS,
@@ -55,6 +58,7 @@ impl App {
 
                 if self.game_data.curr_piece.is_some() {
                     self.handle_move();
+                    self.handle_hold();
                     self.handle_rotate();
                     self.handle_gravity();
                     self.handle_freeze();
@@ -126,6 +130,22 @@ impl App {
         }
     }
 
+    fn handle_hold(&mut self) {
+        if is_key_pressed(self.game_data.keybind.hold) && self.game_data.hold_piece.can_swap() {
+            let Some(piece) = self.game_data.curr_piece.take() else { return };
+
+            self.game_data.curr_piece = self
+                .game_data
+                .hold_piece
+                .take()
+                .map_or(None, |p| self.init_piece(p.piece));
+
+            let mut hp = HoldPiece::new(piece.tetris_piece());
+            hp.set_hold();
+            self.game_data.hold_piece = Some(hp);
+        }
+    }
+
     fn handle_rotate(&mut self) {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
 
@@ -185,8 +205,16 @@ impl App {
     }
 
     fn spawn_piece(&mut self) -> Option<PieceWithPosition> {
+        if let Some(hp) = &mut self.game_data.hold_piece {
+            hp.reset_hold();
+        }
         let p = self.game_data.piece_bag.as_mut().unwrap().next_piece();
         logging::debug!("Spawned piece: {:?}", &p.piece_type);
+
+        self.init_piece(p)
+    }
+
+    fn init_piece(&mut self, p: Piece) -> Option<PieceWithPosition> {
         let init_pos = match p.piece_type {
             rust_tetris_core::enums::PieceType::I => (3, 18),
             _ => (3, 19),

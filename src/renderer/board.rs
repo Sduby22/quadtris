@@ -56,6 +56,7 @@ fn render_next(game_data: &GameData, text_renderer: &TextRenderer, block_rendere
         piece_bag
             .piece_buffer()
             .iter()
+            .rev()
             .enumerate()
             .for_each(|(i, piece)| {
                 render_tetrimino(
