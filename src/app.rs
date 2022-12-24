@@ -62,7 +62,6 @@ impl App {
                     self.handle_rotate();
                     self.handle_gravity();
                     self.handle_freeze();
-                    self.handle_clear();
                 } else if let Some(p) = self.spawn_piece() {
                     self.game_data.curr_piece = Some(p);
                 } else {
@@ -164,7 +163,7 @@ impl App {
             piece.move_down();
         }
 
-        piece.finalize_on(&mut self.game_data.board);
+        self.freeze_piece();
         self.game_data.curr_piece = None;
     }
 
@@ -245,6 +244,8 @@ impl App {
 
         self.game_data.curr_piece = None;
         self.game_data.freeze_left = self.game_data.freeze_delay;
+
+        self.handle_clear();
     }
 
     fn game_stop(&mut self) {
