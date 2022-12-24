@@ -52,18 +52,26 @@ pub struct GameData {
     pub curr_piece: Option<PieceWithPosition>,
 
     pub gravity: f32,
-    pub das: usize,
-    pub arr: usize,
+    pub das: f32,
+    pub das_left: f32,
+    pub arr: f32,
     pub soft_drop_gravity: f32,
     pub freeze_delay: f32,
 
     pub freeze_left: f32,
     pub accumulated_down: f32,
     pub accumulated_move: f32,
+    pub move_state: MoveState,
 
     pub state: GameState,
     pub lines: u32,
     pub time: f32,
+}
+
+pub enum MoveState {
+    Left,
+    Right,
+    No,
 }
 
 impl GameData {
@@ -76,15 +84,18 @@ impl GameData {
             curr_piece: None,
 
             gravity: 0.0156,
-            das: 9,
-            arr: 2,
-            freeze_delay: 30.,
-            soft_drop_gravity: 20.,
-
-            freeze_left: 30.,
+            soft_drop_gravity: 40.,
             accumulated_down: 0.,
-            accumulated_move: 0.,
 
+            freeze_delay: 30.,
+            freeze_left: 30.,
+
+            das: 6.,
+            das_left: 6.,
+
+            arr: 0.,
+            accumulated_move: 0.,
+            move_state: MoveState::No,
             state: GameState::Playing,
             lines: 0,
             time: 0.,

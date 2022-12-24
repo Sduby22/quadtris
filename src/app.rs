@@ -3,7 +3,7 @@ use rust_tetris_core::pieces::PieceWithPosition;
 
 use crate::{
     constants::FPS,
-    game_data::{GameData, GameState},
+    game_data::{GameData, GameState, MoveState},
     renderer::Renderer,
 };
 
@@ -33,7 +33,6 @@ impl App {
             self.tick();
             self.renderer.render(&self.game_data);
 
-            println!("FPS:{}", get_fps());
             next_frame().await;
         }
     }
@@ -55,6 +54,8 @@ impl App {
                 self.game_data.time += get_frame_time();
 
                 if self.game_data.curr_piece.is_some() {
+                    self.handle_move();
+                    self.handle_rotate();
                     self.handle_gravity();
                     self.handle_freeze();
                 } else if let Some(p) = self.spawn_piece() {
@@ -68,6 +69,7 @@ impl App {
     }
 
     fn handle_gravity(&mut self) {
+        let Some(piece) = &mut self.game_data.curr_piece else {return};
         let gravity = if is_key_down(self.game_data.keybind.soft_drop) {
             self.game_data.soft_drop_gravity
         } else {
@@ -79,7 +81,6 @@ impl App {
             let step = self.game_data.accumulated_down.floor() as usize;
             self.game_data.accumulated_down -= step as f32;
             for _ in 0..step {
-                let piece = self.game_data.curr_piece.as_mut().unwrap();
                 if piece.collides_down(&self.game_data.board) {
                 } else {
                     piece.move_down();
@@ -89,7 +90,7 @@ impl App {
     }
 
     fn handle_freeze(&mut self) {
-        let piece = self.game_data.curr_piece.as_mut().unwrap();
+        let Some(piece) = &mut self.game_data.curr_piece else {return};
         if piece.collides_down(&self.game_data.board) {
             self.game_data.freeze_left -= relative_frame();
             if self.game_data.freeze_left < 0. {
@@ -98,6 +99,88 @@ impl App {
         } else {
             self.game_data.freeze_left = self.game_data.freeze_delay;
         }
+    }
+
+    fn handle_move(&mut self) {
+        let Some(piece) = &mut self.game_data.curr_piece else {return};
+
+        if is_key_pressed(self.game_data.keybind.hard_drop) {
+            self.hard_drop();
+            return;
+        }
+
+        if is_key_pressed(self.game_data.keybind.left) {
+            piece.try_move_left(&self.game_data.board);
+            self.change_move_state(MoveState::Left);
+        } else if is_key_pressed(self.game_data.keybind.right) {
+            piece.try_move_right(&self.game_data.board);
+            self.change_move_state(MoveState::Right);
+        }
+
+        match self.game_data.move_state {
+            MoveState::Left if is_key_down(self.game_data.keybind.left) => self.handle_das(),
+            MoveState::Right if is_key_down(self.game_data.keybind.right) => self.handle_das(),
+            _ => {
+                self.change_move_state(MoveState::No);
+            }
+        }
+    }
+
+    fn handle_rotate(&mut self) {
+        let Some(piece) = &mut self.game_data.curr_piece else {return};
+
+        if is_key_pressed(self.game_data.keybind.rotate_cw) {
+        } else if is_key_pressed(self.game_data.keybind.rotate_ccw) {
+            piece.try_rotate_right(&self.game_data.board);
+        }
+    }
+
+    fn hard_drop(&mut self) {
+        let Some(piece) = &mut self.game_data.curr_piece else {return};
+
+        while !piece.collides_down(&self.game_data.board) {
+            piece.move_down();
+        }
+
+        piece.finalize_on(&mut self.game_data.board);
+        self.game_data.curr_piece = None;
+    }
+
+    fn change_move_state(&mut self, state: MoveState) {
+        self.game_data.move_state = state;
+        self.game_data.das_left = self.game_data.das;
+        self.game_data.accumulated_move = 0.;
+    }
+
+    fn handle_das(&mut self) {
+        let Some(piece) = &mut self.game_data.curr_piece else {return};
+        if self.game_data.das_left <= 0. {
+            self.game_data.accumulated_move += relative_frame() / self.game_data.arr.max(0.000001);
+            let mut step = self.game_data.accumulated_move.floor() as usize;
+            match self.game_data.move_state {
+                MoveState::Left => {
+                    while step != 0 && !piece.collides_left(&self.game_data.board) {
+                        step -= 1;
+                        piece.move_left();
+                    }
+                }
+                MoveState::Right => {
+                    while step != 0 && !piece.collides_right(&self.game_data.board) {
+                        step -= 1;
+                        piece.move_right();
+                    }
+                }
+                _ => unreachable!(),
+            }
+        } else {
+            self.game_data.das_left -= relative_frame();
+        }
+    }
+
+    fn clear_das(&mut self) {
+        self.game_data.move_state = MoveState::No;
+        self.game_data.das_left = self.game_data.das;
+        self.game_data.accumulated_move = 0.;
     }
 
     fn spawn_piece(&mut self) -> Option<PieceWithPosition> {
