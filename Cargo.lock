@@ -692,6 +692,7 @@ name = "quad"
 version = "0.1.0"
 dependencies = [
  "egui-macroquad",
+ "lazy_static",
  "macroquad",
  "rust_tetris_core",
 ]

@@ -3,6 +3,7 @@ use crate::constants::{get_rotations, Kick, DEFAULT_KICKS, I_KICKS};
 use crate::enums::{PieceType, PieceTypeColor, Rotation};
 use std::fmt;
 
+#[derive(Clone)]
 pub struct Piece {
     pub piece_type: PieceType,
     pub board: Board,
@@ -117,7 +118,7 @@ fn fill_piece_matrix(piece: PieceType, matrix: &mut Board, rotation: Rotation) {
     let matrix_bytes = get_rotations(piece, rotation);
     let cols = matrix.cols;
 
-    for (row, row_vec) in matrix_bytes.iter().zip(matrix.rows_mut()) {
+    for (row, row_vec) in matrix_bytes.iter().rev().zip(matrix.rows_mut()) {
         let mut acc = 1u8 << (cols - 1);
         for col in row_vec {
             let ch = match row & acc {

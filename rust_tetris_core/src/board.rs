@@ -22,6 +22,7 @@ pub fn not_playable_piece_to_cell() -> Cell {
     Cell::Filled(PieceTypeColor::NotPlayable)
 }
 
+#[derive(Clone)]
 pub struct Board {
     pub rows: isize,
     pub cols: isize,

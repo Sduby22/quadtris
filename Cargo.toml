@@ -9,6 +9,7 @@ edition = "2021"
 macroquad = "0.3.25"
 egui-macroquad = "0.12.0"
 rust_tetris_core = { path = "rust_tetris_core" }
+lazy_static = "1.4.0"
 
 [workspace]
 members = ['rust_tetris_core']

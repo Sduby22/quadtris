@@ -20,23 +20,16 @@ pub struct App {
 impl App {
     pub async fn new() -> App {
         // build_textures_atlas();
-        let mut board = Board::new(20, 10);
-        load_board(&mut board, "************");
-        let game_data = GameData {
-            // board: Board::new(20, 10),
-            board,
-            piece_bag: PieceBag::new(6, None),
-        };
         let renderer = Renderer::new().await;
 
         App {
-            game_data,
+            game_data: GameData::new(),
             renderer,
             ui_ctx: UiCtx {
-                fov: 0.3,
+                fov: 0.72,
                 camera_x: 0.0,
                 camera_y: 0.0,
-                camera_z: 300.0,
+                camera_z: 100.0,
             },
         }
     }

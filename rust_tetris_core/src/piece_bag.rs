@@ -32,6 +32,10 @@ impl PieceBag {
         inst
     }
 
+    pub fn piece_buffer(&self) -> &VecDeque<Piece> {
+        &self.buffer_next_pieces
+    }
+
     /// Returns the next piece in the bag.
     /// If the buffer is empty, it gets filled from the permutation.
     pub fn next_piece(&mut self) -> Piece {
