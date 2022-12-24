@@ -30,12 +30,6 @@ impl Renderer {
     }
 
     pub fn render(&self, game_data: &GameData) {
-        draw_grid(
-            5,
-            5.0,
-            Color::from_rgba(255, 255, 255, 255),
-            Color::from_rgba(255, 0, 0, 255),
-        );
         render_board(
             game_data,
             Vec3 {
@@ -46,7 +40,6 @@ impl Renderer {
             &self.block_renderer,
             &self.text_renderer,
         );
-        self.draw_text("A", Vec2::Y * 10., FONT_SIZE, text::Color::RED);
     }
 
     pub fn draw_block(&self, variant: block::BlockVariant, position: Vec3, size: f32) {
