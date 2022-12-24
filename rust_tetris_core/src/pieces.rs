@@ -192,6 +192,10 @@ impl PieceWithPosition {
         }
     }
 
+    pub fn collides(&self, matrix: &Board) -> bool {
+        self.piece.collides(self.r, self.c, matrix)
+    }
+
     pub fn collides_left(&self, matrix: &Board) -> bool {
         self.piece.collides(self.r, self.c - 1, matrix)
     }

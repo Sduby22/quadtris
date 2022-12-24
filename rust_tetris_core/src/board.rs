@@ -70,6 +70,10 @@ impl Board {
         self.set_val(i, j, Cell::Empty);
     }
 
+    pub fn clear_all(&mut self) {
+        self.remove_rows(self.rows - 1, -1);
+    }
+
     pub fn set_val(&mut self, i: isize, j: isize, b: Cell) {
         self.data[i as usize][j as usize] = b;
     }
@@ -254,6 +258,16 @@ mod tests {
         let mut board = Board::new(5, 3);
         load_board(&mut board, "     *  OILTSJZ");
         assert_eq!(board.is_set(r, c), res);
+    }
+
+    #[test]
+    fn test_board_clear_all() {
+        let mut board = Board::new(5, 3);
+
+        load_board(&mut board, "***************");
+        board.clear_all();
+
+        assert!(board.data.iter().all(|r| r.iter().all(|c| !is_filled(*c))));
     }
 
     #[test]
