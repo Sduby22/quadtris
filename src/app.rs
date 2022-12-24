@@ -11,7 +11,6 @@ pub struct App {
     renderer: Renderer,
     game_data: GameData,
     time_elapsed: f32,
-    next_frame: f32,
 }
 
 impl App {
@@ -23,7 +22,6 @@ impl App {
             game_data: GameData::new(),
             renderer,
             time_elapsed: 0.,
-            next_frame: 0.,
         }
     }
 
@@ -32,16 +30,11 @@ impl App {
         loop {
             self.time_elapsed += get_frame_time();
 
-            if self.time_elapsed < self.next_frame {
-                next_frame().await;
-            } else {
-                self.next_frame = self.time_elapsed + 1. / FPS;
+            self.tick();
+            self.renderer.render(&self.game_data);
 
-                self.tick();
-                self.renderer.render(&self.game_data);
-
-                next_frame().await;
-            }
+            println!("FPS:{}", get_fps());
+            next_frame().await;
         }
     }
 
@@ -81,7 +74,7 @@ impl App {
             self.game_data.gravity
         };
 
-        self.game_data.accumulated_down += gravity;
+        self.game_data.accumulated_down += gravity * relative_frame();
         if self.game_data.accumulated_down >= 1.0 {
             let step = self.game_data.accumulated_down.floor() as usize;
             self.game_data.accumulated_down -= step as f32;
@@ -98,10 +91,9 @@ impl App {
     fn handle_freeze(&mut self) {
         let piece = self.game_data.curr_piece.as_mut().unwrap();
         if piece.collides_down(&self.game_data.board) {
-            if self.game_data.freeze_left == 0 {
+            self.game_data.freeze_left -= relative_frame();
+            if self.game_data.freeze_left < 0. {
                 self.freeze_piece();
-            } else {
-                self.game_data.freeze_left -= 1;
             }
         } else {
             self.game_data.freeze_left = self.game_data.freeze_delay;
@@ -129,6 +121,7 @@ impl App {
         piece.finalize_on(&mut self.game_data.board);
 
         self.game_data.curr_piece = None;
+        self.game_data.freeze_left = self.game_data.freeze_delay;
     }
 
     fn game_stop(&mut self) {
@@ -159,4 +152,8 @@ impl App {
     //
     //     egui_macroquad::draw();
     // }
+}
+
+fn relative_frame() -> f32 {
+    get_frame_time() * 60.
 }
