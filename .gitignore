@@ -2,3 +2,6 @@
 /wasm
 
 .DS_Store
+
+web/res
+web/*.wasm

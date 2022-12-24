@@ -688,16 +688,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "quad"
-version = "0.1.0"
-dependencies = [
- "egui-macroquad",
- "lazy_static",
- "macroquad",
- "rust_tetris_core",
-]
-
-[[package]]
 name = "quad-alsa-sys"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -733,6 +723,16 @@ checksum = "e674b7e6218e9d5d01ca431e2088b647cd75cdf483f8201533dcb1fecfa25f03"
 dependencies = [
  "sapp-jsutils",
  "webbrowser",
+]
+
+[[package]]
+name = "quadtris"
+version = "0.1.0"
+dependencies = [
+ "egui-macroquad",
+ "lazy_static",
+ "macroquad",
+ "rust_tetris_core",
 ]
 
 [[package]]

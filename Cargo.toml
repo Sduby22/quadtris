@@ -1,5 +1,5 @@
 [package]
-name = "quad"
+name = "quadtris"
 version = "0.1.0"
 edition = "2021"
 
@@ -13,3 +13,6 @@ lazy_static = "1.4.0"
 
 [workspace]
 members = ['rust_tetris_core']
+
+[profile.release]
+opt-level = 's'
