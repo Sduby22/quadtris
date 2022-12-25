@@ -282,7 +282,9 @@ impl App {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
         if self.game_data.das_left <= 0. {
             self.game_data.accumulated_move += relative_frame() / self.game_data.arr.max(0.000001);
+            println!("{}", self.game_data.accumulated_move);
             let mut step = self.game_data.accumulated_move.floor() as usize;
+            self.game_data.accumulated_move = self.game_data.accumulated_move.fract();
             match self.game_data.move_state {
                 MoveState::Left => {
                     while step != 0 && !piece.collides_left(&self.game_data.board) {
