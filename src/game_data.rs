@@ -6,6 +6,7 @@ use macroquad::prelude::*;
 
 use crate::menu::MenuCtx;
 
+#[derive(PartialEq, Eq)]
 pub enum GameState {
     Menu,
     Playing,
@@ -82,7 +83,7 @@ impl GameData {
             curr_piece: None,
 
             gravity: 0.0156,
-            soft_drop_gravity: 40.,
+            soft_drop_gravity: 20.,
             accumulated_down: 0.,
 
             freeze_delay: 120.,

@@ -8,6 +8,7 @@ use crate::{
 pub struct MenuCtx {
     pub states: Vec<MenuState>,
     pub curr_pointer: i32,
+    pub modifying: bool,
 }
 
 impl MenuCtx {
@@ -15,11 +16,12 @@ impl MenuCtx {
         Self {
             states: vec![MenuState::Main],
             curr_pointer: 0,
+            modifying: false,
         }
     }
 
     pub fn curr_state(&self) -> MenuState {
-        self.states.last().unwrap().clone()
+        *self.states.last().unwrap()
     }
 
     pub fn pop_state(&mut self) {
@@ -45,12 +47,12 @@ pub enum MenuState {
 
 pub struct Menu<'a> {
     widgets: Vec<Box<dyn 'a + MenuWidget>>,
-    ctx: &'a MenuCtx,
+    ctx: &'a mut MenuCtx,
     text_renderer: &'a TextRenderer,
 }
 
 impl<'a> Menu<'a> {
-    pub fn new(ctx: &'a MenuCtx, text_renderer: &'a TextRenderer) -> Self {
+    pub fn new(ctx: &'a mut MenuCtx, text_renderer: &'a TextRenderer) -> Self {
         Self {
             ctx,
             text_renderer,
@@ -67,19 +69,18 @@ impl<'a> Menu<'a> {
         self.widgets.push(Box::new(widget));
     }
 
-    pub fn draw(&mut self) {
-        let mut y_offset = 0.;
+    pub fn draw(&mut self, mut position: Vec2) {
         for widget in self.widgets.iter_mut() {
-            widget.draw(Vec2::Y * y_offset, self.text_renderer, self.ctx);
-            y_offset -= widget.get_height();
+            widget.draw(position, self.text_renderer, self.ctx);
+            position.y -= widget.get_height();
             widget.handle_input(self.ctx);
         }
     }
 }
 
-trait MenuWidget {
+pub trait MenuWidget {
     fn draw(&self, position: Vec2, text_renderer: &TextRenderer, ctx: &MenuCtx);
-    fn handle_input(&mut self, ctx: &MenuCtx);
+    fn handle_input(&mut self, ctx: &mut MenuCtx);
     fn get_height(&self) -> f32;
     fn insert_menu(&mut self, id: i32);
 }
@@ -114,7 +115,7 @@ impl<'a> MenuWidget for Button<'a> {
         );
     }
 
-    fn handle_input(&mut self, ctx: &MenuCtx) {
+    fn handle_input(&mut self, ctx: &mut MenuCtx) {
         if self.id == ctx.curr_pointer && is_key_pressed(KeyCode::Enter) {
             (self.callback)();
         }
@@ -130,19 +131,22 @@ impl<'a> MenuWidget for Button<'a> {
 }
 
 pub struct Selector<'a, T> {
+    label: &'a str,
     value: &'a mut T,
     optional_value: &'a [T],
-    optional_value_labels: &'a [&'a str],
+    optional_value_labels: &'a [String],
     id: i32,
 }
 
 impl<'a, T: PartialEq + Clone> Selector<'a, T> {
     pub fn new(
+        label: &'a str,
         value: &'a mut T,
         optional_value: &'a [T],
-        optional_value_labels: &'a [&'a str],
+        optional_value_labels: &'a [String],
     ) -> Self {
         Self {
+            label,
             value,
             optional_value,
             optional_value_labels,
@@ -174,8 +178,14 @@ impl<'a, T: PartialEq + Clone> Selector<'a, T> {
 
 impl<'a, T: PartialEq + Clone> MenuWidget for Selector<'a, T> {
     fn draw(&self, position: Vec2, text_renderer: &TextRenderer, ctx: &MenuCtx) {
+        let text = format!(
+            "{:<9}<{:^5}>",
+            self.label,
+            self.optional_value_labels[self.curr_index()]
+        );
+
         text_renderer.draw_text(
-            self.optional_value_labels[self.curr_index()],
+            &text,
             position,
             FONT_SIZE,
             if self.id == ctx.curr_pointer {
@@ -186,7 +196,7 @@ impl<'a, T: PartialEq + Clone> MenuWidget for Selector<'a, T> {
         );
     }
 
-    fn handle_input(&mut self, ctx: &MenuCtx) {
+    fn handle_input(&mut self, ctx: &mut MenuCtx) {
         if self.id == ctx.curr_pointer {
             if is_key_pressed(KeyCode::Left) {
                 self.select_left();
@@ -203,4 +213,84 @@ impl<'a, T: PartialEq + Clone> MenuWidget for Selector<'a, T> {
     fn insert_menu(&mut self, id: i32) {
         self.id = id;
     }
+}
+
+pub struct KeyBind<'a> {
+    value: &'a mut KeyCode,
+    label: &'a str,
+    id: i32,
+}
+
+impl<'a> KeyBind<'a> {
+    pub fn new(value: &'a mut KeyCode, label: &'a str) -> Self {
+        Self {
+            value,
+            label,
+            id: -1,
+        }
+    }
+}
+
+impl<'a> MenuWidget for KeyBind<'a> {
+    fn draw(&self, position: Vec2, text_renderer: &TextRenderer, ctx: &MenuCtx) {
+        let key = if ctx.modifying && self.id == ctx.curr_pointer {
+            "WAIT".to_string()
+        } else {
+            format!("{:?}", self.value)
+        };
+
+        let text = format!("{:<11}{:>5}", self.label, key);
+
+        text_renderer.draw_text(
+            &text,
+            position,
+            FONT_SIZE,
+            if self.id == ctx.curr_pointer {
+                text::Color::Cream
+            } else {
+                text::Color::Magenta
+            },
+        );
+    }
+
+    fn handle_input(&mut self, ctx: &mut MenuCtx) {
+        if self.id != ctx.curr_pointer {
+            return;
+        }
+
+        if ctx.modifying {
+            if let Some(key) = get_last_key_pressed() {
+                match key {
+                    KeyCode::Escape | KeyCode::Enter => {}
+                    _ => {
+                        *self.value = key;
+                    }
+                }
+            }
+        } else if is_key_pressed(KeyCode::Enter) {
+            ctx.modifying = true;
+        }
+    }
+
+    fn get_height(&self) -> f32 {
+        FONT_SIZE
+    }
+
+    fn insert_menu(&mut self, id: i32) {
+        self.id = id;
+    }
+}
+
+pub struct Margin;
+
+impl MenuWidget for Margin {
+    fn draw(&self, _: Vec2, _: &TextRenderer, _: &MenuCtx) {}
+
+    fn handle_input(&mut self, _: &mut MenuCtx) {}
+
+    fn get_height(&self) -> f32 {
+        FONT_SIZE
+    }
+
+    fn insert_menu(&mut self, _: i32) {}
 }

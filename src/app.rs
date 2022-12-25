@@ -1,3 +1,5 @@
+use egui_macroquad::egui::style::Margin;
+use lazy_static::lazy_static;
 use macroquad::{logging, prelude::*};
 use rust_tetris_core::{
     holder::{HoldPiece, Swappable},
@@ -5,6 +7,7 @@ use rust_tetris_core::{
 };
 
 use crate::{
+    constants::{BLOCK_SIZE, BOARD_POS, SCORE_POS},
     game_data::{GameData, GameState, MoveState},
     menu::*,
     renderer::Renderer,
@@ -89,10 +92,10 @@ impl App {
 
     pub fn draw_menu(&mut self) {
         let ctx = &mut self.menu_ctx;
-        let mut menu = Menu::new(ctx, &self.renderer.text_renderer);
 
         let mut next_state = ctx.curr_state();
-        match ctx.curr_state() {
+        let mut menu = Menu::new(ctx, &self.renderer.text_renderer);
+        match next_state {
             MenuState::Main => {
                 menu.add_widget(Button::new("START", || {
                     self.game_data.start();
@@ -102,23 +105,68 @@ impl App {
                 }));
             }
             MenuState::Settings => {
-                menu.add_widget(Button::new("PLAY0", || println!("pressed0")));
-                menu.add_widget(Button::new("PLAY1", || println!("pressed1")));
+                menu.add_widget(KeyBind::new(&mut self.game_data.keybind.left, "LEFT"));
+                menu.add_widget(KeyBind::new(&mut self.game_data.keybind.right, "RIGHT"));
+                menu.add_widget(KeyBind::new(
+                    &mut self.game_data.keybind.soft_drop,
+                    "SOFT DROP",
+                ));
+                menu.add_widget(KeyBind::new(
+                    &mut self.game_data.keybind.hard_drop,
+                    "HARD DROP",
+                ));
+                menu.add_widget(KeyBind::new(
+                    &mut self.game_data.keybind.rotate_cw,
+                    "ROTATE CW",
+                ));
+                menu.add_widget(KeyBind::new(
+                    &mut self.game_data.keybind.rotate_ccw,
+                    "ROTATE CCW",
+                ));
+                menu.add_widget(KeyBind::new(&mut self.game_data.keybind.hold, "HOLD"));
+                menu.add_widget(KeyBind::new(&mut self.game_data.keybind.restart, "RESTART"));
+
+                menu.add_widget(Margin);
+
                 menu.add_widget(Selector::new(
+                    "DAS",
                     &mut self.game_data.das,
-                    &[5., 6., 7.],
-                    &["5", "6", "7"],
+                    &DAS_VALUES,
+                    &DAS_LABELS,
+                ));
+                menu.add_widget(Selector::new(
+                    "ARR",
+                    &mut self.game_data.arr,
+                    &ARR_VALUES,
+                    &ARR_LABELS,
+                ));
+                menu.add_widget(Selector::new(
+                    "SOFTDROP",
+                    &mut self.game_data.soft_drop_gravity,
+                    &SOFT_DROP_VALUES,
+                    &SOFT_DROP_LABELS,
                 ));
             }
         }
 
-        menu.draw();
+        menu.draw(
+            BOARD_POS.xx()
+                + Vec2 {
+                    x: -0.5 * BLOCK_SIZE,
+                    y: 17.5 * BLOCK_SIZE,
+                },
+        );
         let menu_len = menu.len();
         drop(menu);
 
         ctx.push_state(next_state);
 
-        if is_key_pressed(KeyCode::Down) {
+        if get_last_key_pressed().is_some() && ctx.modifying {
+            let k = get_last_key_pressed().unwrap();
+            if k != KeyCode::Enter {
+                ctx.modifying = false;
+            }
+        } else if is_key_pressed(KeyCode::Down) {
             ctx.curr_pointer += 1;
         } else if is_key_pressed(KeyCode::Up) {
             ctx.curr_pointer -= 1;
@@ -132,7 +180,7 @@ impl App {
     fn handle_gravity(&mut self) {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
         let gravity = if is_key_down(self.game_data.keybind.soft_drop) {
-            self.game_data.soft_drop_gravity
+            self.game_data.soft_drop_gravity.max(self.game_data.gravity)
         } else {
             self.game_data.gravity
         };
@@ -320,4 +368,39 @@ impl App {
 
 fn relative_frame() -> f32 {
     get_frame_time() * 60.
+}
+
+lazy_static! {
+    static ref DAS_VALUES: Vec<f32> = (1..=15).map(|x| x as f32).collect();
+    static ref DAS_LABELS: Vec<String> = DAS_VALUES.iter().map(|x| x.to_string()).collect();
+    static ref ARR_VALUES: Vec<f32> = (0..=10).map(|x| x as f32).collect();
+    static ref ARR_LABELS: Vec<String> = ARR_VALUES.iter().map(|x| x.to_string()).collect();
+    static ref SOFT_DROP_VALUES: Vec<f32> = vec![
+        1. / 64.,
+        1. / 32.,
+        1. / 16.,
+        1. / 8.,
+        1. / 4.,
+        1. / 2.,
+        1.,
+        2.,
+        3.,
+        4.,
+        5.,
+        20.
+    ];
+    static ref SOFT_DROP_LABELS: Vec<String> = vec![
+        "1/64G".to_string(),
+        "1/32G".to_string(),
+        "1/16G".to_string(),
+        "1/8G".to_string(),
+        "1/4G".to_string(),
+        "1/2G".to_string(),
+        "1G".to_string(),
+        "2G".to_string(),
+        "3G".to_string(),
+        "4G".to_string(),
+        "5G".to_string(),
+        "20G".to_string(),
+    ];
 }

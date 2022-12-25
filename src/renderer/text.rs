@@ -28,6 +28,7 @@ impl TextRenderer {
         let mut x = position.x;
         let y = position.y;
         for c in text.chars() {
+            let c = c.to_uppercase().next().unwrap();
             let code = c as usize;
 
             // continue if c is not in valid range

@@ -1,5 +1,5 @@
 use crate::constants::*;
-use crate::game_data::GameData;
+use crate::game_data::{GameData, GameState};
 use macroquad::prelude::*;
 
 use self::board::render_board;
@@ -38,23 +38,14 @@ impl Renderer {
 
         render_board(
             game_data,
-            Vec3 {
-                x: -30.,
-                y: -30.,
-                z: 0.,
-            },
+            BOARD_POS,
             &self.block_renderer,
             &self.text_renderer,
         );
 
-        render_score(
-            game_data,
-            Vec2 {
-                x: 0.,
-                y: -FONT_SIZE * 5.,
-            },
-            &self.text_renderer,
-        );
+        if game_data.state != GameState::Menu {
+            render_score(game_data, SCORE_POS, &self.text_renderer);
+        }
     }
 
     fn setup_camera(&self) {
