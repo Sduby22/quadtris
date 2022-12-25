@@ -1,6 +1,7 @@
 mod app;
 mod constants;
 mod game_data;
+mod menu;
 mod renderer;
 
 #[macroquad::main("Tetris")]

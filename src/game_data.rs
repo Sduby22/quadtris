@@ -4,6 +4,8 @@ use rust_tetris_core::{
 
 use macroquad::prelude::*;
 
+use crate::menu::MenuCtx;
+
 pub enum GameState {
     Menu,
     Playing,

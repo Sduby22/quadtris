@@ -5,16 +5,16 @@ use macroquad::prelude::*;
 use self::board::render_board;
 use self::score::render_score;
 
-mod block;
-mod board;
-mod material;
-mod score;
-mod text;
-mod utils;
+pub mod block;
+pub mod board;
+pub mod material;
+pub mod score;
+pub mod text;
+pub mod utils;
 
 pub struct Renderer {
-    block_renderer: block::BlockRenderer,
-    text_renderer: text::TextRenderer,
+    pub block_renderer: block::BlockRenderer,
+    pub text_renderer: text::TextRenderer,
 }
 
 impl Renderer {

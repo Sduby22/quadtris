@@ -6,12 +6,14 @@ use rust_tetris_core::{
 
 use crate::{
     game_data::{GameData, GameState, MoveState},
+    menu::*,
     renderer::Renderer,
 };
 
 pub struct App {
     renderer: Renderer,
     game_data: GameData,
+    menu_ctx: MenuCtx,
     time_elapsed: f32,
 }
 
@@ -23,6 +25,7 @@ impl App {
         App {
             game_data: GameData::new(),
             renderer,
+            menu_ctx: MenuCtx::new(),
             time_elapsed: 0.,
         }
     }
@@ -35,13 +38,16 @@ impl App {
             self.tick();
             self.renderer.render(&self.game_data);
 
+            if let GameState::Menu = self.game_data.state {
+                self.draw_menu();
+            }
+
             next_frame().await;
         }
     }
-
     fn tick(&mut self) {
         match self.game_data.state {
-            GameState::Menu => todo!(),
+            GameState::Menu => {}
             GameState::Playing => {
                 if is_key_pressed(self.game_data.keybind.restart) {
                     self.game_restart();
@@ -79,6 +85,48 @@ impl App {
                 }
             }
         }
+    }
+
+    pub fn draw_menu(&mut self) {
+        let ctx = &mut self.menu_ctx;
+        let mut menu = Menu::new(ctx, &self.renderer.text_renderer);
+
+        let mut next_state = ctx.curr_state();
+        match ctx.curr_state() {
+            MenuState::Main => {
+                menu.add_widget(Button::new("START", || {
+                    self.game_data.start();
+                }));
+                menu.add_widget(Button::new("SETTINGS", || {
+                    next_state = MenuState::Settings;
+                }));
+            }
+            MenuState::Settings => {
+                menu.add_widget(Button::new("PLAY0", || println!("pressed0")));
+                menu.add_widget(Button::new("PLAY1", || println!("pressed1")));
+                menu.add_widget(Selector::new(
+                    &mut self.game_data.das,
+                    &[5., 6., 7.],
+                    &["5", "6", "7"],
+                ));
+            }
+        }
+
+        menu.draw();
+        let menu_len = menu.len();
+        drop(menu);
+
+        ctx.push_state(next_state);
+
+        if is_key_pressed(KeyCode::Down) {
+            ctx.curr_pointer += 1;
+        } else if is_key_pressed(KeyCode::Up) {
+            ctx.curr_pointer -= 1;
+        } else if is_key_pressed(KeyCode::Escape) {
+            ctx.pop_state();
+        }
+
+        ctx.curr_pointer = ctx.curr_pointer.clamp(0, menu_len as i32 - 1);
     }
 
     fn handle_gravity(&mut self) {
@@ -268,21 +316,6 @@ impl App {
     fn game_start(&mut self) {
         self.game_data.start();
     }
-
-    // fn draw_ui(&mut self) {
-    //     egui_macroquad::ui(|egui_ctx| {
-    //         egui_macroquad::egui::Window::new("egui ❤ macroquad").show(egui_ctx, |ui| {
-    //             ui.style_mut().spacing.slider_width = 500.;
-    //             ui.label("Test");
-    //             ui.add(Slider::new(&mut self.ui_ctx.fov, 0.0..=1.0).text("slider"));
-    //             ui.add(Slider::new(&mut self.ui_ctx.camera_x, 0.0..=1000.0).text("slider"));
-    //             ui.add(Slider::new(&mut self.ui_ctx.camera_y, 0.0..=1000.0).text("slider"));
-    //             ui.add(Slider::new(&mut self.ui_ctx.camera_z, 0.0..=2000.0).text("slider"));
-    //         });
-    //     });
-    //
-    //     egui_macroquad::draw();
-    // }
 }
 
 fn relative_frame() -> f32 {
