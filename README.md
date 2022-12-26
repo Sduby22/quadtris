@@ -5,6 +5,7 @@ A Modern Tetris game built with Rust using [Macroquad](https://macroquad.rs/).
 Features:
 
 - [x] [SRS (Super Rotation System)](https://harddrop.com/wiki/SRS)
+- [x] [DAS, ARR](https://harddrop.com/wiki/ARR), Soft Drop Gravity and Keybind customization
 - [ ] T-spin and All Clear detection
 - [ ] 40 Lines and Marathon mode
 - [ ] Sound effects
