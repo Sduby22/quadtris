@@ -9,7 +9,7 @@ Features:
 - [ ] 40 Lines and Marathon mode
 - [ ] Sound effects
 
-Try online [here](quadtris.chocole.top)
+Try online [here](https://quadtris.chocole.top)
 
 # Build
 
