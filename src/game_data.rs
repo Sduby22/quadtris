@@ -119,7 +119,7 @@ impl GameData {
             arr: ARR_DEFAULT,
             accumulated_move: 0.,
             move_state: MoveState::No,
-            state: GameState::Playing,
+            state: GameState::Menu,
             lines: 0,
             time: 0.,
         }

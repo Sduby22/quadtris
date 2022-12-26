@@ -36,7 +36,6 @@ impl App {
     }
 
     pub async fn run(&mut self) {
-        self.game_start();
         loop {
             self.time_elapsed += get_frame_time();
 
