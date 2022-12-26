@@ -1,4 +1,3 @@
-use egui_macroquad::egui::style::Margin;
 use lazy_static::lazy_static;
 use macroquad::{logging, prelude::*};
 use rust_tetris_core::{
@@ -7,8 +6,8 @@ use rust_tetris_core::{
 };
 
 use crate::{
-    constants::{BLOCK_SIZE, BOARD_POS, SCORE_POS},
-    game_data::{GameData, GameState, MoveState},
+    constants::{BLOCK_SIZE, BOARD_POS},
+    game_data::{load_user_settings, save_user_settings, GameData, GameState, MoveState},
     menu::*,
     renderer::Renderer,
 };
@@ -24,9 +23,12 @@ impl App {
     pub async fn new() -> App {
         // build_textures_atlas();
         let renderer = Renderer::new().await;
+        let mut game_data = GameData::new();
+
+        load_user_settings(&mut game_data);
 
         App {
-            game_data: GameData::new(),
+            game_data,
             renderer,
             menu_ctx: MenuCtx::new(),
             time_elapsed: 0.,
@@ -52,12 +54,12 @@ impl App {
         match self.game_data.state {
             GameState::Menu => {}
             GameState::Playing => {
-                if is_key_pressed(self.game_data.keybind.restart) {
+                if self.game_data.keybind.restart.is_pressed() {
                     self.game_restart();
                     return;
                 }
 
-                if is_key_pressed(self.game_data.keybind.escape) {
+                if self.game_data.keybind.escape.is_pressed() {
                     self.game_stop();
                     return;
                 }
@@ -77,12 +79,12 @@ impl App {
                 }
             }
             GameState::GameOver => {
-                if is_key_pressed(self.game_data.keybind.restart) {
+                if self.game_data.keybind.restart.is_pressed() {
                     self.game_restart();
                     return;
                 }
 
-                if is_key_pressed(self.game_data.keybind.escape) {
+                if self.game_data.keybind.escape.is_pressed() {
                     self.game_stop();
                     return;
                 }
@@ -171,6 +173,9 @@ impl App {
         } else if is_key_pressed(KeyCode::Up) {
             ctx.curr_pointer -= 1;
         } else if is_key_pressed(KeyCode::Escape) {
+            if let MenuState::Settings = ctx.curr_state() {
+                save_user_settings(&self.game_data);
+            }
             ctx.pop_state();
         }
 
@@ -179,7 +184,7 @@ impl App {
 
     fn handle_gravity(&mut self) {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
-        let gravity = if is_key_down(self.game_data.keybind.soft_drop) {
+        let gravity = if self.game_data.keybind.soft_drop.is_down() {
             self.game_data.soft_drop_gravity.max(self.game_data.gravity)
         } else {
             self.game_data.gravity
@@ -213,22 +218,22 @@ impl App {
     fn handle_move(&mut self) {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
 
-        if is_key_pressed(self.game_data.keybind.hard_drop) {
+        if self.game_data.keybind.hard_drop.is_pressed() {
             self.hard_drop();
             return;
         }
 
-        if is_key_pressed(self.game_data.keybind.left) {
+        if self.game_data.keybind.left.is_pressed() {
             piece.try_move_left(&self.game_data.board);
             self.change_move_state(MoveState::Left);
-        } else if is_key_pressed(self.game_data.keybind.right) {
+        } else if self.game_data.keybind.right.is_pressed() {
             piece.try_move_right(&self.game_data.board);
             self.change_move_state(MoveState::Right);
         }
 
         match self.game_data.move_state {
-            MoveState::Left if is_key_down(self.game_data.keybind.left) => self.handle_das(),
-            MoveState::Right if is_key_down(self.game_data.keybind.right) => self.handle_das(),
+            MoveState::Left if self.game_data.keybind.left.is_down() => self.handle_das(),
+            MoveState::Right if self.game_data.keybind.right.is_down() => self.handle_das(),
             _ => {
                 self.change_move_state(MoveState::No);
             }
@@ -236,7 +241,7 @@ impl App {
     }
 
     fn handle_hold(&mut self) {
-        if is_key_pressed(self.game_data.keybind.hold) && self.game_data.hold_piece.can_swap() {
+        if self.game_data.keybind.hold.is_pressed() && self.game_data.hold_piece.can_swap() {
             let Some(piece) = self.game_data.curr_piece.take() else { return };
 
             self.game_data.curr_piece = if let Some(p) = self.game_data.hold_piece.take() {
@@ -254,9 +259,9 @@ impl App {
     fn handle_rotate(&mut self) {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
 
-        if is_key_pressed(self.game_data.keybind.rotate_cw) {
+        if self.game_data.keybind.rotate_cw.is_pressed() {
             piece.try_rotate(&self.game_data.board);
-        } else if is_key_pressed(self.game_data.keybind.rotate_ccw) {
+        } else if self.game_data.keybind.rotate_ccw.is_pressed() {
             piece.try_rotate_prev(&self.game_data.board);
         }
     }
@@ -282,7 +287,6 @@ impl App {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
         if self.game_data.das_left <= 0. {
             self.game_data.accumulated_move += relative_frame() / self.game_data.arr.max(0.000001);
-            println!("{}", self.game_data.accumulated_move);
             let mut step = self.game_data.accumulated_move.floor() as usize;
             self.game_data.accumulated_move = self.game_data.accumulated_move.fract();
             match self.game_data.move_state {

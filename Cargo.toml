@@ -10,6 +10,8 @@ macroquad = "0.3.25"
 egui-macroquad = "0.12.0"
 rust_tetris_core = { path = "rust_tetris_core" }
 lazy_static = "1.4.0"
+quad-storage = "0.1.3"
+nanoserde = "0.1.32"
 
 [workspace]
 members = ['rust_tetris_core']

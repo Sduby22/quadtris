@@ -2,6 +2,7 @@ use macroquad::prelude::*;
 
 use crate::{
     constants::FONT_SIZE,
+    game_data::{save_user_settings, Key},
     renderer::text::{self, TextRenderer},
 };
 
@@ -216,13 +217,13 @@ impl<'a, T: PartialEq + Clone> MenuWidget for Selector<'a, T> {
 }
 
 pub struct KeyBind<'a> {
-    value: &'a mut KeyCode,
+    value: &'a mut Key,
     label: &'a str,
     id: i32,
 }
 
 impl<'a> KeyBind<'a> {
-    pub fn new(value: &'a mut KeyCode, label: &'a str) -> Self {
+    pub fn new(value: &'a mut Key, label: &'a str) -> Self {
         Self {
             value,
             label,
@@ -236,7 +237,7 @@ impl<'a> MenuWidget for KeyBind<'a> {
         let key = if ctx.modifying && self.id == ctx.curr_pointer {
             "WAIT".to_string()
         } else {
-            format!("{:?}", self.value)
+            format!("{:?}", self.value.code())
         };
 
         let text = format!("{:<11}{:>5}", self.label, key);
@@ -259,11 +260,11 @@ impl<'a> MenuWidget for KeyBind<'a> {
         }
 
         if ctx.modifying {
-            if let Some(key) = get_last_key_pressed() {
-                match key {
+            if let Some(keycode) = get_last_key_pressed() {
+                match keycode {
                     KeyCode::Escape | KeyCode::Enter => {}
                     _ => {
-                        *self.value = key;
+                        *self.value = Key::new(keycode);
                     }
                 }
             }

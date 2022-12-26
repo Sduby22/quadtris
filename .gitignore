@@ -5,3 +5,5 @@
 
 web/res
 web/*.wasm
+
+local.data
