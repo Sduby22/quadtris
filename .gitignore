@@ -6,4 +6,6 @@
 web/res
 web/*.wasm
 
+quadtris.wasm
+
 local.data
