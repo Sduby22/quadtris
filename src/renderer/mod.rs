@@ -50,12 +50,8 @@ impl Renderer {
 
     fn setup_camera(&self) {
         set_camera(&Camera3D {
-            position: Vec3 {
-                x: 0.,
-                y: 0.,
-                z: 100.,
-            },
-            fovy: 0.72,
+            position: CAMERA_POS,
+            fovy: CAMERA_FOV,
             target: Vec3::ZERO,
             up: Vec3::Y,
             ..Default::default()

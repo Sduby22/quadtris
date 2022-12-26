@@ -1,13 +1,20 @@
 use macroquad::prelude::*;
 
-pub const BLOCK_SIZE: f32 = 3.0;
-pub const FONT_SIZE: f32 = 3.0;
+pub const CAMERA_FOV: f32 = 0.4;
+pub const CAMERA_POS: Vec3 = Vec3 {
+    x: 0.,
+    y: 0.,
+    z: 100.,
+};
+
+pub const BLOCK_SIZE: f32 = 1.5;
+pub const FONT_SIZE: f32 = 1.5;
 pub const FONT_PATH: &str = "res/graphics/font_big_sheet.png";
 pub const BLOCK_PATH: &str = "res/graphics/blockskin/big/b2-sheet.png";
 
 pub const BOARD_POS: Vec3 = Vec3 {
-    x: -30.,
-    y: -30.,
+    x: -10. * BLOCK_SIZE,
+    y: -10. * BLOCK_SIZE,
     z: 0.,
 };
 
