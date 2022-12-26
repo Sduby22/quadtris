@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use crate::{
     constants::FONT_SIZE,
-    game_data::{save_user_settings, Key},
+    game_data::Key,
     renderer::text::{self, TextRenderer},
 };
 

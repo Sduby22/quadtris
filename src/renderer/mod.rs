@@ -10,6 +10,7 @@ pub mod board;
 pub mod material;
 pub mod score;
 pub mod text;
+pub mod texture_atlas;
 pub mod utils;
 
 pub struct Renderer {
@@ -22,8 +23,7 @@ impl Renderer {
         let block_img = load_image(BLOCK_PATH).await.unwrap();
         let block_renderer = block::BlockRenderer::new(block_img);
 
-        let text_img = load_texture(FONT_PATH).await.unwrap();
-        text_img.set_filter(FilterMode::Nearest);
+        let text_img = load_image(FONT_PATH).await.unwrap();
         let text_renderer = text::TextRenderer::new(text_img);
 
         Self {

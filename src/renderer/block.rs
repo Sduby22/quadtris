@@ -1,5 +1,7 @@
 use macroquad::prelude::*;
 
+use super::texture_atlas::TextureAltas;
+
 #[derive(Clone, Copy)]
 #[allow(dead_code)]
 pub enum BlockVariant {
@@ -17,19 +19,14 @@ pub enum BlockVariant {
 }
 
 pub struct BlockRenderer {
-    textures: Vec<Texture2D>,
+    texture_atlas: TextureAltas,
 }
 
 impl BlockRenderer {
     pub fn new(block_img: Image) -> Self {
-        let mut textures = vec![];
-        for i in 0..9 {
-            let img = block_img.sub_image(Rect::new((32 * i) as f32, 0.0, 32.0, 32.0));
-            let t = Texture2D::from_image(&img);
-            t.set_filter(FilterMode::Nearest);
-            textures.push(t);
+        Self {
+            texture_atlas: TextureAltas::new(block_img, 1, 9, 32, 32, 2, 2),
         }
-        Self { textures }
     }
 
     pub fn draw_block(&self, variant: BlockVariant, position: Vec3, size: f32) {
@@ -51,6 +48,6 @@ impl BlockRenderer {
     }
 
     fn get_texture(&self, variant: BlockVariant) -> Texture2D {
-        self.textures[variant as usize]
+        self.texture_atlas.get_texture(variant as usize)
     }
 }
