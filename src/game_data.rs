@@ -6,6 +6,8 @@ use rust_tetris_core::{
 
 use macroquad::prelude::*;
 
+use crate::constants::{ARR_DEFAULT, DAS_DEFAULT, SOFT_DROP_DEFAULT};
+
 #[derive(PartialEq, Eq)]
 pub enum GameState {
     Menu,
@@ -105,16 +107,16 @@ impl GameData {
             curr_piece: None,
 
             gravity: 0.0156,
-            soft_drop_gravity: 20.,
+            soft_drop_gravity: SOFT_DROP_DEFAULT,
             accumulated_down: 0.,
 
             freeze_delay: 120.,
             freeze_left: 120.,
 
-            das: 6.,
-            das_left: 6.,
+            das: DAS_DEFAULT,
+            das_left: DAS_DEFAULT,
 
-            arr: 0.,
+            arr: ARR_DEFAULT,
             accumulated_move: 0.,
             move_state: MoveState::No,
             state: GameState::Playing,

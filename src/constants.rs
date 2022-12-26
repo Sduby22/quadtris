@@ -15,3 +15,7 @@ pub const SCORE_POS: Vec2 = Vec2 {
     x: 0.,
     y: -FONT_SIZE * 5.,
 };
+
+pub const DAS_DEFAULT: f32 = 8.;
+pub const ARR_DEFAULT: f32 = 4.;
+pub const SOFT_DROP_DEFAULT: f32 = 0.5;
