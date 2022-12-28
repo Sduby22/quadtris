@@ -5,9 +5,16 @@ A Modern Tetris game built with Rust using [Macroquad](https://macroquad.rs/).
 Features:
 
 - [x] [SRS (Super Rotation System)](https://harddrop.com/wiki/SRS)
+  - [ ] 180 Rotation Wallkicks with [TETR.IO Wallkick tables](https://twitter.com/tetriogame/status/1271572187309375491)
 - [x] [DAS, ARR](https://harddrop.com/wiki/ARR), Soft Drop Gravity and Keybind customization
+- [ ] Visual effects
+  - [ ] Global Lighting
+  - [ ] Gamefield Frame
+  - [ ] Different Materials for Moving/Freezing/Finalized Blocks
 - [ ] T-spin and All Clear detection
-- [ ] 40 Lines and Marathon mode
+- [ ] Game Modes
+  - [ ] 40 Lines Sprint
+  - [ ] Marathon
 - [ ] Sound effects
 
 Try online [here](https://quadtris.chocole.top)
