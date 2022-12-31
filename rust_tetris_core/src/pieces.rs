@@ -1,5 +1,5 @@
 use crate::board::{playable_piece_to_cell, Board, Cell};
-use crate::constants::{get_rotations, Kick, DEFAULT_KICKS, I_KICKS};
+use crate::constants::{get_rotations, Kick, DEFAULT_KICKS, I_KICKS, KICKS_180};
 use crate::enums::{PieceType, PieceTypeColor, Rotation};
 use std::fmt;
 
@@ -37,6 +37,10 @@ impl Piece {
 
     pub fn rotate_piece_prev(&mut self) {
         self.set_rotation(self.rotation.prev());
+    }
+
+    pub fn rotate_piece_180(&mut self) {
+        self.set_rotation(self.rotation.next().next());
     }
 
     pub fn set_rotation(&mut self, rotation: Rotation) {
@@ -86,13 +90,23 @@ impl Piece {
             (R270, R180) => 5,
             (R270, R0) => 6,
             (R0, R270) => 7,
+            (R0, R180) => 0,
+            (R180, R0) => 1,
+            (R90, R270) => 2,
+            (R270, R90) => 3,
             _ => unreachable!(),
         };
 
-        match self.piece_type {
-            PieceType::I => &I_KICKS[kick_index],
-            PieceType::O => &[(0, 0)],
-            _ => &DEFAULT_KICKS[kick_index],
+        if (self.rotation as usize).abs_diff(from_rot as usize) != 2 {
+            // 90 Deg
+            match self.piece_type {
+                PieceType::I => &I_KICKS[kick_index],
+                PieceType::O => &[(0, 0)],
+                _ => &DEFAULT_KICKS[kick_index],
+            }
+        } else {
+            // 180 deg
+            &KICKS_180[kick_index]
         }
     }
 }
@@ -265,6 +279,19 @@ impl PieceWithPosition {
             true
         } else {
             self.piece.rotate_piece();
+            false
+        }
+    }
+
+    pub fn try_rotate_180(&mut self, matrix: &Board) -> bool {
+        let prev = self.piece.rotation;
+        self.piece.rotate_piece_180();
+
+        if let Some(k) = self.rotate_and_kick(prev, matrix) {
+            self.kick_by(k);
+            true
+        } else {
+            self.piece.rotate_piece_180();
             false
         }
     }

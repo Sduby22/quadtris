@@ -5,7 +5,7 @@ A Modern Tetris game built with Rust using [Macroquad](https://macroquad.rs/).
 Features:
 
 - [x] [SRS (Super Rotation System)](https://harddrop.com/wiki/SRS)
-  - [ ] 180 Rotation Wallkicks with [TETR.IO Wallkick tables](https://twitter.com/tetriogame/status/1271572187309375491)
+  - [x] 180 Rotation Wallkicks with [TETR.IO Wallkick tables](https://twitter.com/tetriogame/status/1271572187309375491)
 - [x] [DAS, ARR](https://harddrop.com/wiki/ARR), Soft Drop Gravity and Keybind customization
 - [ ] Visual effects
   - [ ] Global Lighting

@@ -45,6 +45,7 @@ pub struct KeyBind {
 
     pub rotate_cw: Key,
     pub rotate_ccw: Key,
+    pub rotate_180: Key,
     pub hold: Key,
 
     pub restart: Key,
@@ -60,6 +61,7 @@ impl Default for KeyBind {
             hard_drop: Key(KeyCode::W),
             rotate_cw: Key(KeyCode::K),
             rotate_ccw: Key(KeyCode::J),
+            rotate_180: Key(KeyCode::C),
             hold: Key(KeyCode::L),
             restart: Key(KeyCode::R),
             escape: Key(KeyCode::Escape),

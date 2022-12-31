@@ -139,6 +139,10 @@ impl App {
                     &mut self.game_data.keybind.rotate_ccw,
                     "ROTATE CCW",
                 ));
+                menu.add_widget(KeyBind::new(
+                    &mut self.game_data.keybind.rotate_180,
+                    "ROTATE 180",
+                ));
                 menu.add_widget(KeyBind::new(&mut self.game_data.keybind.hold, "HOLD"));
                 menu.add_widget(KeyBind::new(&mut self.game_data.keybind.restart, "RESTART"));
 
@@ -269,10 +273,14 @@ impl App {
     fn handle_rotate(&mut self) {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
 
-        if self.game_data.keybind.rotate_cw.is_pressed() {
+        let kb = &self.game_data.keybind;
+
+        if kb.rotate_cw.is_pressed() {
             piece.try_rotate(&self.game_data.board);
-        } else if self.game_data.keybind.rotate_ccw.is_pressed() {
+        } else if kb.rotate_ccw.is_pressed() {
             piece.try_rotate_prev(&self.game_data.board);
+        } else if kb.rotate_180.is_pressed() {
+            piece.try_rotate_180(&self.game_data.board);
         }
     }
 
