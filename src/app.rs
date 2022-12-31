@@ -6,7 +6,7 @@ use rust_tetris_core::{
 };
 
 use crate::{
-    constants::{BLOCK_SIZE, BOARD_POS, MENU_POS},
+    constants::MENU_POS,
     game_data::{load_user_settings, save_user_settings, GameData, GameState, MoveState},
     menu::*,
     renderer::{Renderer, text},
@@ -37,8 +37,6 @@ impl App {
 
     pub async fn run(&mut self) {
         loop {
-            let fps = get_fps();
-            logging::info!("fps: {}", fps);
             self.time_elapsed += get_frame_time();
 
             self.tick();

@@ -13,6 +13,9 @@ use super::{
 };
 use lazy_static::lazy_static;
 
+const HOLD_NEXT_PRIMARY_SCALE: f32 = 0.75;
+const HOLD_NEXT_SECONDARY_SCALE: f32 = 0.5;
+
 pub fn render_board(
     game_data: &GameData,
     pos: Vec3,
@@ -22,7 +25,7 @@ pub fn render_board(
     let board = &game_data.board;
     push_model_matrix(Mat4::from_translation(pos));
 
-    render_board_blocks(board, block_renderer);
+    render_board_blocks(board, BLOCK_SIZE, block_renderer);
     render_curr_piece(game_data, block_renderer);
     render_ghost_piece(game_data, block_renderer);
 
@@ -40,13 +43,13 @@ fn render_ghost_piece(game_data: &GameData, block_renderer: &BlockRenderer) {
             p.move_down();
         }
 
-        render_tetrimino_wire(&p, block_renderer);
+        render_tetrimino_wire(&p, BLOCK_SIZE, block_renderer);
     }
 }
 
 fn render_curr_piece(game_data: &GameData, block_renderer: &BlockRenderer) {
     if let Some(p) = &game_data.curr_piece {
-        render_tetrimino(p, block_renderer);
+        render_tetrimino(p, BLOCK_SIZE, block_renderer);
     }
 }
 
@@ -56,14 +59,14 @@ fn render_next(game_data: &GameData, text_renderer: &TextRenderer, block_rendere
     text_renderer.draw_text(
         "NEXT",
         Vec2 {
-            x: 0.,
-            y: BLOCK_SIZE * 2.,
+            x: BLOCK_SIZE * -0.2,
+            y: BLOCK_SIZE * 2.5,
         },
-        FONT_SIZE,
+        FONT_SIZE*HOLD_NEXT_SECONDARY_SCALE,
         text::Color::Yellow,
     );
 
-    let (mut dx, mut dy) = (1, -1);
+    let (mut dx, mut dy) = (0, 0);
 
     if let Some(piece_bag) = &game_data.piece_bag {
         piece_bag
@@ -74,6 +77,12 @@ fn render_next(game_data: &GameData, text_renderer: &TextRenderer, block_rendere
             .for_each(|(i, piece)| {
                 render_tetrimino(
                     &PieceWithPosition::new(dy, dx, piece.clone()),
+                    if i == 0 {
+                        dx += 3;
+                        BLOCK_SIZE*HOLD_NEXT_PRIMARY_SCALE
+                    } else {
+                        BLOCK_SIZE*HOLD_NEXT_SECONDARY_SCALE
+                    },
                     block_renderer,
                 );
                 if i < 2 {
@@ -100,16 +109,17 @@ fn render_hold(game_data: &GameData, text_renderer: &TextRenderer, block_rendere
     text_renderer.draw_text(
         "HOLD",
         Vec2 {
-            x: 0.,
-            y: BLOCK_SIZE * 2.,
+            x: BLOCK_SIZE * -0.2,
+            y: BLOCK_SIZE * 2.5,
         },
-        FONT_SIZE,
+        FONT_SIZE*HOLD_NEXT_SECONDARY_SCALE,
         text::Color::Yellow,
     );
 
     if let Some(hp) = &game_data.hold_piece {
         render_tetrimino(
-            &PieceWithPosition::new(-1, 1, hp.piece.clone()),
+            &PieceWithPosition::new(0, 0, hp.piece.clone()),
+            BLOCK_SIZE*HOLD_NEXT_PRIMARY_SCALE,
             block_renderer,
         )
     }
@@ -117,7 +127,7 @@ fn render_hold(game_data: &GameData, text_renderer: &TextRenderer, block_rendere
     pop_model_matrix();
 }
 
-fn render_board_blocks(board: &Board, block_renderer: &BlockRenderer) {
+fn render_board_blocks(board: &Board, block_size: f32, block_renderer: &BlockRenderer) {
     board.rows().flatten().enumerate().for_each(|(ind, cell)| {
         let x = ind % board.cols as usize;
         let y = ind / board.cols as usize;
@@ -125,16 +135,17 @@ fn render_board_blocks(board: &Board, block_renderer: &BlockRenderer) {
         render_cell(
             cell,
             Vec3 {
-                x: BLOCK_SIZE * x as f32,
-                y: BLOCK_SIZE * y as f32,
+                x: block_size * x as f32,
+                y: block_size * y as f32,
                 z: 0.,
             },
+            block_size,
             block_renderer,
         );
     });
 }
 
-fn render_board_blocks_wire(board: &Board, block_renderer: &BlockRenderer) {
+fn render_board_blocks_wire(board: &Board, block_size: f32, block_renderer: &BlockRenderer) {
     board
         .rows()
         .flatten()
@@ -146,36 +157,36 @@ fn render_board_blocks_wire(board: &Board, block_renderer: &BlockRenderer) {
 
             block_renderer.draw_wire_block(
                 Vec3 {
-                    x: BLOCK_SIZE * x as f32,
-                    y: BLOCK_SIZE * y as f32,
+                    x: block_size * x as f32,
+                    y: block_size * y as f32,
                     z: 0.,
                 },
-                BLOCK_SIZE,
+                block_size,
             );
         });
 }
 
-fn render_tetrimino(tetrimino: &PieceWithPosition, block_renderer: &BlockRenderer) {
+fn render_tetrimino(tetrimino: &PieceWithPosition, block_size: f32, block_renderer: &BlockRenderer) {
     push_model_matrix(Mat4::from_translation(Vec3 {
-        x: tetrimino.col() as f32 * BLOCK_SIZE,
-        y: tetrimino.row() as f32 * BLOCK_SIZE,
+        x: tetrimino.col() as f32 * block_size,
+        y: tetrimino.row() as f32 * block_size,
         z: 0.,
     }));
-    render_board_blocks(&tetrimino.tetris_piece_ref().board, block_renderer);
+    render_board_blocks(&tetrimino.tetris_piece_ref().board, block_size, block_renderer);
     pop_model_matrix();
 }
 
-fn render_tetrimino_wire(tetrimino: &PieceWithPosition, block_renderer: &BlockRenderer) {
+fn render_tetrimino_wire(tetrimino: &PieceWithPosition, block_size: f32, block_renderer: &BlockRenderer) {
     push_model_matrix(Mat4::from_translation(Vec3 {
-        x: tetrimino.col() as f32 * BLOCK_SIZE,
-        y: tetrimino.row() as f32 * BLOCK_SIZE,
+        x: tetrimino.col() as f32 * block_size,
+        y: tetrimino.row() as f32 * block_size,
         z: 0.,
     }));
-    render_board_blocks_wire(&tetrimino.tetris_piece_ref().board, block_renderer);
+    render_board_blocks_wire(&tetrimino.tetris_piece_ref().board, block_size, block_renderer);
     pop_model_matrix();
 }
 
-fn render_cell(cell: &Cell, position: Vec3, block_renderer: &BlockRenderer) {
+fn render_cell(cell: &Cell, position: Vec3, size: f32, block_renderer: &BlockRenderer) {
     if let Cell::Filled(piece) = cell {
         let variant = match piece {
             PieceTypeColor::Playable(piece_type) => match piece_type {
@@ -190,7 +201,7 @@ fn render_cell(cell: &Cell, position: Vec3, block_renderer: &BlockRenderer) {
             PieceTypeColor::NotPlayable => BlockVariant::Gray,
         };
 
-        block_renderer.draw_block(variant, position, BLOCK_SIZE);
+        block_renderer.draw_block(variant, position, size);
     }
 }
 
@@ -232,10 +243,10 @@ lazy_static! {
         x: 1. * BLOCK_SIZE,
         y: 19.5 * BLOCK_SIZE,
         z: 2. * BLOCK_SIZE,
-    }) * Mat4::from_scale(Vec3::splat(0.5));
+    });
     static ref NEXT_MAT: Mat4 = Mat4::from_translation(Vec3 {
         x: 5.5 * BLOCK_SIZE,
         y: 19.5 * BLOCK_SIZE,
         z: 2. * BLOCK_SIZE,
-    }) * Mat4::from_scale(Vec3::splat(0.5));
+    });
 }
