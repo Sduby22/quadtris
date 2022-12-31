@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use macroquad::prelude::*;
 
 pub const CAMERA_FOV: f32 = 0.4;
@@ -26,3 +27,11 @@ pub const SCORE_POS: Vec2 = Vec2 {
 pub const DAS_DEFAULT: f32 = 8.;
 pub const ARR_DEFAULT: f32 = 4.;
 pub const SOFT_DROP_DEFAULT: f32 = 0.5;
+
+lazy_static! {
+    pub static ref MENU_POS: Vec2 = BOARD_POS.xx()
+                    + Vec2 {
+                        x: -0.5 * BLOCK_SIZE,
+                        y: 17.5 * BLOCK_SIZE,
+                    };
+}

@@ -6,10 +6,10 @@ use rust_tetris_core::{
 };
 
 use crate::{
-    constants::{BLOCK_SIZE, BOARD_POS},
+    constants::{BLOCK_SIZE, BOARD_POS, MENU_POS},
     game_data::{load_user_settings, save_user_settings, GameData, GameState, MoveState},
     menu::*,
-    renderer::Renderer,
+    renderer::{Renderer, text},
 };
 
 pub struct App {
@@ -37,18 +37,27 @@ impl App {
 
     pub async fn run(&mut self) {
         loop {
+            let fps = get_fps();
+            logging::info!("fps: {}", fps);
             self.time_elapsed += get_frame_time();
 
             self.tick();
             self.renderer.render(&self.game_data);
 
-            if let GameState::Menu = self.game_data.state {
-                self.draw_menu();
+            match self.game_data.state {
+                GameState::Menu => {
+                    self.draw_menu();
+                }
+                GameState::GameOver => {
+                    self.draw_gameover();
+                }
+                _ => (),
             }
 
             next_frame().await;
         }
     }
+
     fn tick(&mut self) {
         match self.game_data.state {
             GameState::Menu => {}
@@ -89,6 +98,14 @@ impl App {
                 }
             }
         }
+    }
+
+    pub fn draw_gameover(&self) {
+        let ctx = &mut MenuCtx::new();
+        let mut menu = Menu::new(ctx, &self.renderer.text_renderer);
+
+        menu.add_widget(Label::new("GAME OVER!", text::Color::Yellow));
+        menu.draw(*MENU_POS);
     }
 
     pub fn draw_menu(&mut self) {
@@ -151,11 +168,7 @@ impl App {
         }
 
         menu.draw(
-            BOARD_POS.xx()
-                + Vec2 {
-                    x: -0.5 * BLOCK_SIZE,
-                    y: 17.5 * BLOCK_SIZE,
-                },
+            *MENU_POS
         );
         let menu_len = menu.len();
         drop(menu);

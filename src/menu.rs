@@ -71,10 +71,16 @@ impl<'a> Menu<'a> {
     }
 
     pub fn draw(&mut self, mut position: Vec2) {
-        for widget in self.widgets.iter_mut() {
-            widget.draw(position, self.text_renderer, self.ctx);
-            position.y -= widget.get_height();
-            widget.handle_input(self.ctx);
+        unsafe {
+            get_internal_gl().quad_gl.depth_test(false);
+
+            for widget in self.widgets.iter_mut() {
+                widget.draw(position, self.text_renderer, self.ctx);
+                position.y -= widget.get_height();
+                widget.handle_input(self.ctx);
+            }
+
+            get_internal_gl().quad_gl.depth_test(true);
         }
     }
 }
@@ -294,4 +300,29 @@ impl MenuWidget for Margin {
     }
 
     fn insert_menu(&mut self, _: i32) {}
+}
+
+pub struct Label<'a> {
+    text: &'a str,
+    color: text::Color,
+}
+
+impl<'a> Label<'a> {
+    pub fn new(text: &'a str, color: text::Color) -> Self { Self { text, color } }
+}
+
+impl<'a> MenuWidget for Label<'a> {
+    fn draw(&self, position: Vec2, text_renderer: &TextRenderer, ctx: &MenuCtx) {
+        text_renderer.draw_text(self.text, position, FONT_SIZE, self.color);
+    }
+
+    fn handle_input(&mut self, ctx: &mut MenuCtx) {
+    }
+
+    fn get_height(&self) -> f32 {
+        FONT_SIZE
+    }
+
+    fn insert_menu(&mut self, id: i32) {
+    }
 }
