@@ -1,6 +1,7 @@
 use lazy_static::lazy_static;
 use macroquad::{logging, prelude::*};
 use rust_tetris_core::{
+    board::Board,
     holder::{HoldPiece, Swappable},
     pieces::{Piece, PieceWithPosition},
 };
@@ -9,12 +10,14 @@ use crate::{
     constants::MENU_POS,
     game_data::{load_user_settings, save_user_settings, GameData, GameState, MoveState},
     menu::*,
-    renderer::{Renderer, text},
+    renderer::{text, Renderer},
+    sound::SoundAssets,
 };
 
 pub struct App {
     renderer: Renderer,
     game_data: GameData,
+    sounds: SoundAssets,
     menu_ctx: MenuCtx,
     time_elapsed: f32,
 }
@@ -23,6 +26,8 @@ impl App {
     pub async fn new() -> App {
         // build_textures_atlas();
         let renderer = Renderer::new().await;
+
+        let sounds = SoundAssets::new().await;
         let mut game_data = GameData::new();
 
         load_user_settings(&mut game_data);
@@ -30,6 +35,7 @@ impl App {
         App {
             game_data,
             renderer,
+            sounds,
             menu_ctx: MenuCtx::new(),
             time_elapsed: 0.,
         }
@@ -169,9 +175,7 @@ impl App {
             }
         }
 
-        menu.draw(
-            *MENU_POS
-        );
+        menu.draw(*MENU_POS);
         let menu_len = menu.len();
         drop(menu);
 
@@ -204,12 +208,18 @@ impl App {
             self.game_data.gravity
         };
 
+        let touch_ground_before = piece.collides_down(&self.game_data.board);
+
         self.game_data.accumulated_down += gravity * relative_frame();
         if self.game_data.accumulated_down >= 1.0 {
             let step = self.game_data.accumulated_down.floor() as usize;
             self.game_data.accumulated_down -= step as f32;
             for _ in 0..step {
                 if piece.collides_down(&self.game_data.board) {
+                    if !touch_ground_before {
+                        self.sounds.mino_touch_ground.play();
+                    }
+                    break;
                 } else {
                     piece.move_down();
                 }
@@ -238,10 +248,10 @@ impl App {
         }
 
         if self.game_data.keybind.left.is_pressed() {
-            piece.try_move_left(&self.game_data.board);
+            piece_move_step(piece, MoveState::Left, 1, &self.game_data.board, &self.sounds);
             self.change_move_state(MoveState::Left);
         } else if self.game_data.keybind.right.is_pressed() {
-            piece.try_move_right(&self.game_data.board);
+            piece_move_step(piece, MoveState::Right, 1, &self.game_data.board, &self.sounds);
             self.change_move_state(MoveState::Right);
         }
 
@@ -255,18 +265,25 @@ impl App {
     }
 
     fn handle_hold(&mut self) {
-        if self.game_data.keybind.hold.is_pressed() && self.game_data.hold_piece.can_swap() {
-            let Some(piece) = self.game_data.curr_piece.take() else { return };
+        if self.game_data.keybind.hold.is_pressed() {
+            if self.game_data.hold_piece.can_swap() {
+                // hold success
+                let Some(piece) = self.game_data.curr_piece.take() else { return };
 
-            self.game_data.curr_piece = if let Some(p) = self.game_data.hold_piece.take() {
-                self.init_piece(p.piece)
+                self.game_data.curr_piece = if let Some(p) = self.game_data.hold_piece.take() {
+                    self.init_piece(p.piece)
+                } else {
+                    self.spawn_piece()
+                };
+
+                let mut hp = HoldPiece::new(piece.tetris_piece());
+                hp.set_hold();
+                self.game_data.hold_piece = Some(hp);
+                self.sounds.mino_hold.play();
             } else {
-                self.spawn_piece()
-            };
-
-            let mut hp = HoldPiece::new(piece.tetris_piece());
-            hp.set_hold();
-            self.game_data.hold_piece = Some(hp);
+                // hold failed
+                self.sounds.mino_holdfail.play();
+            }
         }
     }
 
@@ -293,6 +310,8 @@ impl App {
 
         self.freeze_piece();
         self.game_data.curr_piece = None;
+
+        self.sounds.mino_touch_ground.play();
     }
 
     fn change_move_state(&mut self, state: MoveState) {
@@ -305,23 +324,9 @@ impl App {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
         if self.game_data.das_left <= 0. {
             self.game_data.accumulated_move += relative_frame() / self.game_data.arr.max(0.000001);
-            let mut step = self.game_data.accumulated_move.floor() as usize;
+            let step = self.game_data.accumulated_move.floor() as usize;
             self.game_data.accumulated_move = self.game_data.accumulated_move.fract();
-            match self.game_data.move_state {
-                MoveState::Left => {
-                    while step != 0 && !piece.collides_left(&self.game_data.board) {
-                        step -= 1;
-                        piece.move_left();
-                    }
-                }
-                MoveState::Right => {
-                    while step != 0 && !piece.collides_right(&self.game_data.board) {
-                        step -= 1;
-                        piece.move_right();
-                    }
-                }
-                _ => unreachable!(),
-            }
+            piece_move_step(piece, self.game_data.move_state, step, &self.game_data.board, &self.sounds);
         } else {
             self.game_data.das_left -= relative_frame();
         }
@@ -330,11 +335,14 @@ impl App {
     fn handle_clear(&mut self) {
         let board = &mut self.game_data.board;
         let ranges = board.completed_rows();
-        for (from, to) in ranges.iter() {
-            self.game_data.lines += (from - to) as u32;
-        }
+        if !ranges.is_empty() {
+            for (from, to) in ranges.iter() {
+                self.game_data.lines += (from - to) as u32;
+            }
 
-        board.remove_ranges(ranges);
+            board.remove_ranges(ranges);
+            self.sounds.mino_clear.play();
+        }
     }
 
     fn spawn_piece(&mut self) -> Option<PieceWithPosition> {
@@ -344,6 +352,7 @@ impl App {
         let p = self.game_data.piece_bag.as_mut().unwrap().next_piece();
         logging::debug!("Spawned piece: {:?}", &p.piece_type);
 
+        self.sounds.mino_spawn.play();
         self.init_piece(p)
     }
 
@@ -368,6 +377,7 @@ impl App {
         self.game_data.curr_piece = None;
         self.game_data.freeze_left = self.game_data.freeze_delay;
 
+        self.sounds.mino_lock.play();
         self.handle_clear();
     }
 
@@ -392,6 +402,41 @@ impl App {
 
 fn relative_frame() -> f32 {
     get_frame_time() * 60.
+}
+
+fn piece_move_step(
+    piece: &mut PieceWithPosition,
+    move_state: MoveState,
+    mut step: usize,
+    board: &Board,
+    sounds: &SoundAssets,
+) {
+    let mut moved = false;
+    let touch_ground_before = piece.collides_down(board);
+
+    match move_state {
+        MoveState::Left => {
+            while step != 0 && !piece.collides_left(board) {
+                step -= 1;
+                piece.move_left();
+                moved = true;
+            }
+        }
+        MoveState::Right => {
+            while step != 0 && !piece.collides_right(board) {
+                step -= 1;
+                piece.move_right();
+                moved = true;
+            }
+        }
+        _ => {}
+    }
+
+    let touch_groud_after = piece.collides_down(board);
+
+    if moved && touch_ground_before && touch_groud_after {
+        sounds.mino_touch_ground.play();
+    }
 }
 
 lazy_static! {

@@ -308,7 +308,9 @@ pub struct Label<'a> {
 }
 
 impl<'a> Label<'a> {
-    pub fn new(text: &'a str, color: text::Color) -> Self { Self { text, color } }
+    pub fn new(text: &'a str, color: text::Color) -> Self {
+        Self { text, color }
+    }
 }
 
 impl<'a> MenuWidget for Label<'a> {
@@ -316,13 +318,11 @@ impl<'a> MenuWidget for Label<'a> {
         text_renderer.draw_text(self.text, position, FONT_SIZE, self.color);
     }
 
-    fn handle_input(&mut self, ctx: &mut MenuCtx) {
-    }
+    fn handle_input(&mut self, ctx: &mut MenuCtx) {}
 
     fn get_height(&self) -> f32 {
         FONT_SIZE
     }
 
-    fn insert_menu(&mut self, id: i32) {
-    }
+    fn insert_menu(&mut self, id: i32) {}
 }

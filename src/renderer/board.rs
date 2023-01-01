@@ -62,7 +62,7 @@ fn render_next(game_data: &GameData, text_renderer: &TextRenderer, block_rendere
             x: BLOCK_SIZE * -0.2,
             y: BLOCK_SIZE * 2.5,
         },
-        FONT_SIZE*HOLD_NEXT_SECONDARY_SCALE,
+        FONT_SIZE * HOLD_NEXT_SECONDARY_SCALE,
         text::Color::Yellow,
     );
 
@@ -79,9 +79,9 @@ fn render_next(game_data: &GameData, text_renderer: &TextRenderer, block_rendere
                     &PieceWithPosition::new(dy, dx, piece.clone()),
                     if i == 0 {
                         dx += 3;
-                        BLOCK_SIZE*HOLD_NEXT_PRIMARY_SCALE
+                        BLOCK_SIZE * HOLD_NEXT_PRIMARY_SCALE
                     } else {
-                        BLOCK_SIZE*HOLD_NEXT_SECONDARY_SCALE
+                        BLOCK_SIZE * HOLD_NEXT_SECONDARY_SCALE
                     },
                     block_renderer,
                 );
@@ -112,14 +112,14 @@ fn render_hold(game_data: &GameData, text_renderer: &TextRenderer, block_rendere
             x: BLOCK_SIZE * -0.2,
             y: BLOCK_SIZE * 2.5,
         },
-        FONT_SIZE*HOLD_NEXT_SECONDARY_SCALE,
+        FONT_SIZE * HOLD_NEXT_SECONDARY_SCALE,
         text::Color::Yellow,
     );
 
     if let Some(hp) = &game_data.hold_piece {
         render_tetrimino(
             &PieceWithPosition::new(0, 0, hp.piece.clone()),
-            BLOCK_SIZE*HOLD_NEXT_PRIMARY_SCALE,
+            BLOCK_SIZE * HOLD_NEXT_PRIMARY_SCALE,
             block_renderer,
         )
     }
@@ -166,23 +166,39 @@ fn render_board_blocks_wire(board: &Board, block_size: f32, block_renderer: &Blo
         });
 }
 
-fn render_tetrimino(tetrimino: &PieceWithPosition, block_size: f32, block_renderer: &BlockRenderer) {
+fn render_tetrimino(
+    tetrimino: &PieceWithPosition,
+    block_size: f32,
+    block_renderer: &BlockRenderer,
+) {
     push_model_matrix(Mat4::from_translation(Vec3 {
         x: tetrimino.col() as f32 * block_size,
         y: tetrimino.row() as f32 * block_size,
         z: 0.,
     }));
-    render_board_blocks(&tetrimino.tetris_piece_ref().board, block_size, block_renderer);
+    render_board_blocks(
+        &tetrimino.tetris_piece_ref().board,
+        block_size,
+        block_renderer,
+    );
     pop_model_matrix();
 }
 
-fn render_tetrimino_wire(tetrimino: &PieceWithPosition, block_size: f32, block_renderer: &BlockRenderer) {
+fn render_tetrimino_wire(
+    tetrimino: &PieceWithPosition,
+    block_size: f32,
+    block_renderer: &BlockRenderer,
+) {
     push_model_matrix(Mat4::from_translation(Vec3 {
         x: tetrimino.col() as f32 * block_size,
         y: tetrimino.row() as f32 * block_size,
         z: 0.,
     }));
-    render_board_blocks_wire(&tetrimino.tetris_piece_ref().board, block_size, block_renderer);
+    render_board_blocks_wire(
+        &tetrimino.tetris_piece_ref().board,
+        block_size,
+        block_renderer,
+    );
     pop_model_matrix();
 }
 

@@ -93,6 +93,7 @@ pub struct GameData {
     pub time: f32,
 }
 
+#[derive(Clone, Copy)]
 pub enum MoveState {
     Left,
     Right,
