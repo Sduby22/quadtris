@@ -209,21 +209,21 @@ impl App {
         };
 
         let touch_ground_before = piece.collides_down(&self.game_data.board);
-
         self.game_data.accumulated_down += gravity * relative_frame();
         if self.game_data.accumulated_down >= 1.0 {
             let step = self.game_data.accumulated_down.floor() as usize;
             self.game_data.accumulated_down -= step as f32;
             for _ in 0..step {
                 if piece.collides_down(&self.game_data.board) {
-                    if !touch_ground_before {
-                        self.sounds.mino_touch_ground.play();
-                    }
                     break;
                 } else {
                     piece.move_down();
                 }
             }
+        }
+
+        if !touch_ground_before && piece.collides_down(&self.game_data.board) {
+            self.sounds.mino_touch_ground.play();
         }
     }
 
