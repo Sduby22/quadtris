@@ -15,7 +15,7 @@ Features:
 - [ ] Game Modes
   - [ ] 40 Lines Sprint
   - [ ] Marathon
-- [ ] Sound effects
+- [x] Sound effects
 
 Try online [here](https://quadtris.chocole.top)
 

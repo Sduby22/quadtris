@@ -248,10 +248,22 @@ impl App {
         }
 
         if self.game_data.keybind.left.is_pressed() {
-            piece_move_step(piece, MoveState::Left, 1, &self.game_data.board, &self.sounds);
+            piece_move_step(
+                piece,
+                MoveState::Left,
+                1,
+                &self.game_data.board,
+                &self.sounds,
+            );
             self.change_move_state(MoveState::Left);
         } else if self.game_data.keybind.right.is_pressed() {
-            piece_move_step(piece, MoveState::Right, 1, &self.game_data.board, &self.sounds);
+            piece_move_step(
+                piece,
+                MoveState::Right,
+                1,
+                &self.game_data.board,
+                &self.sounds,
+            );
             self.change_move_state(MoveState::Right);
         }
 
@@ -291,13 +303,20 @@ impl App {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
 
         let kb = &self.game_data.keybind;
+        let touch_ground_before = piece.collides_down(&self.game_data.board);
 
-        if kb.rotate_cw.is_pressed() {
-            piece.try_rotate(&self.game_data.board);
+        let rotated = if kb.rotate_cw.is_pressed() {
+            piece.try_rotate(&self.game_data.board)
         } else if kb.rotate_ccw.is_pressed() {
-            piece.try_rotate_prev(&self.game_data.board);
+            piece.try_rotate_prev(&self.game_data.board)
         } else if kb.rotate_180.is_pressed() {
-            piece.try_rotate_180(&self.game_data.board);
+            piece.try_rotate_180(&self.game_data.board)
+        } else {
+            false
+        };
+
+        if rotated && touch_ground_before {
+            self.sounds.mino_touch_ground.play()
         }
     }
 
@@ -326,7 +345,13 @@ impl App {
             self.game_data.accumulated_move += relative_frame() / self.game_data.arr.max(0.000001);
             let step = self.game_data.accumulated_move.floor() as usize;
             self.game_data.accumulated_move = self.game_data.accumulated_move.fract();
-            piece_move_step(piece, self.game_data.move_state, step, &self.game_data.board, &self.sounds);
+            piece_move_step(
+                piece,
+                self.game_data.move_state,
+                step,
+                &self.game_data.board,
+                &self.sounds,
+            );
         } else {
             self.game_data.das_left -= relative_frame();
         }
