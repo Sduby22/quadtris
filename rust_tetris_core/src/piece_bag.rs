@@ -44,6 +44,11 @@ impl PieceBag {
         ret
     }
 
+    /// Returns the ref of next piece without consuming the queue.
+    pub fn next_piece_ref_mut(&mut self) -> &mut Piece {
+        self.buffer_next_pieces.back_mut().unwrap()
+    }
+
     /// Adds a piece to the start of the buffer.
     /// Typically used only for the debug commands.
     pub fn add_top(&mut self, p: Piece) {

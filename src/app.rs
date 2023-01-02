@@ -87,6 +87,8 @@ impl App {
                             self.game_over();
                         }
                         self.game_data.spawn_delay_timer.reset();
+                    } else {
+                        self.handle_irs();
                     }
                 }
 
@@ -325,6 +327,19 @@ impl App {
         if rotated && touch_ground_before {
             self.sounds.mino_touch_ground.play()
         }
+    }
+
+    /// handle rotation input during spawn delay
+    fn handle_irs(&mut self) {
+        let next_piece = self.game_data.piece_bag.as_mut().unwrap().next_piece_ref_mut();
+        let kb = &self.game_data.keybind;
+        if kb.rotate_cw.is_pressed() {
+            next_piece.rotate_piece()
+        } else if kb.rotate_ccw.is_pressed() {
+            next_piece.rotate_piece_prev()
+        } else if kb.rotate_180.is_pressed() {
+            next_piece.rotate_piece_180()
+        };
     }
 
     fn hard_drop(&mut self) {

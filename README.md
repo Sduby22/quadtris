@@ -19,8 +19,8 @@ Features:
 - [ ] Gameplay Polishing
   - [ ] Guideline lock delay
   - [ ] T-spin and All Clear detection
-  - [ ] [ARE (spawn delay)](https://harddrop.com/wiki/ARE)
-  - [ ] [IRS](https://harddrop.com/wiki/IRS#IRS)
+  - [x] [ARE (spawn delay)](https://harddrop.com/wiki/ARE)
+  - [x] [IRS](https://harddrop.com/wiki/IRS#IRS)
   - [ ] Line clear delay
 
 Try online [here](https://quadtris.chocole.top)
