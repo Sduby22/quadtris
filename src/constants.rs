@@ -54,3 +54,6 @@ pub const MINO_TOUCH_GROUND: &str = "res/se/move.wav";
 pub const MINO_CLEAR: &str = "res/se/erase1.wav";
 pub const MINO_HOLD: &str = "res/se/hold.wav";
 pub const MINO_HOLDFAIL: &str = "res/se/holdfail.wav";
+
+pub const FIELD_COLS: usize = 10;
+pub const FIELD_ROWS: usize = 20;

@@ -32,7 +32,7 @@ pub fn render_board(
     render_next(game_data, text_renderer, block_renderer);
     render_hold(game_data, text_renderer, block_renderer);
 
-    render_frame(20, 10, BLOCK_SIZE);
+    render_frame(FIELD_ROWS, FIELD_COLS, BLOCK_SIZE);
 
     pop_model_matrix();
 }
@@ -49,7 +49,24 @@ fn render_ghost_piece(game_data: &GameData, block_renderer: &BlockRenderer) {
 
 fn render_curr_piece(game_data: &GameData, block_renderer: &BlockRenderer) {
     if let Some(p) = &game_data.curr_piece {
-        render_tetrimino(p, BLOCK_SIZE, block_renderer);
+        let piece = p.tetris_piece_ref();
+        piece
+            .all_cells()
+            .map(|(y, x)| (x + p.col(), y + p.row(), piece.board.get(y, x)))
+            .filter(|&(_, y, _)| y < FIELD_ROWS as isize)
+            .for_each(|(x, y, cell)| {
+                render_cell(
+                    &cell,
+                    Vec3 {
+                        x: BLOCK_SIZE * x as f32,
+                        y: BLOCK_SIZE * y as f32,
+                        z: 0.,
+                    },
+                    BLOCK_SIZE,
+                    block_renderer,
+                )
+            });
+        // render_tetrimino(p, BLOCK_SIZE, block_renderer);
     }
 }
 
@@ -128,21 +145,24 @@ fn render_hold(game_data: &GameData, text_renderer: &TextRenderer, block_rendere
 }
 
 fn render_board_blocks(board: &Board, block_size: f32, block_renderer: &BlockRenderer) {
-    board.rows().flatten().enumerate().for_each(|(ind, cell)| {
-        let x = ind % board.cols as usize;
-        let y = ind / board.cols as usize;
-
-        render_cell(
-            cell,
-            Vec3 {
-                x: block_size * x as f32,
-                y: block_size * y as f32,
-                z: 0.,
-            },
-            block_size,
-            block_renderer,
-        );
-    });
+    board
+        .rows()
+        .flatten()
+        .enumerate()
+        .map(|(ind, cell)| (ind % board.cols as usize, ind / board.cols as usize, cell))
+        .filter(|&(_, y, _)| y < FIELD_ROWS)
+        .for_each(|(x, y, cell)| {
+            render_cell(
+                cell,
+                Vec3 {
+                    x: block_size * x as f32,
+                    y: block_size * y as f32,
+                    z: 0.,
+                },
+                block_size,
+                block_renderer,
+            );
+        });
 }
 
 fn render_board_blocks_wire(board: &Board, block_size: f32, block_renderer: &BlockRenderer) {
@@ -221,7 +241,7 @@ fn render_cell(cell: &Cell, position: Vec3, size: f32, block_renderer: &BlockRen
     }
 }
 
-fn render_frame(rows: isize, cols: isize, size: f32) {
+fn render_frame(rows: usize, cols: usize, size: f32) {
     let offset = size / 2.;
     (0..=rows).for_each(|row| {
         let y = row as f32 * size - offset;

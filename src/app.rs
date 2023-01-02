@@ -331,7 +331,12 @@ impl App {
 
     /// handle rotation input during spawn delay
     fn handle_irs(&mut self) {
-        let next_piece = self.game_data.piece_bag.as_mut().unwrap().next_piece_ref_mut();
+        let next_piece = self
+            .game_data
+            .piece_bag
+            .as_mut()
+            .unwrap()
+            .next_piece_ref_mut();
         let kb = &self.game_data.keybind;
         if kb.rotate_cw.is_pressed() {
             next_piece.rotate_piece()
