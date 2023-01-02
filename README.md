@@ -11,11 +11,17 @@ Features:
   - [ ] Global Lighting
   - [ ] Gamefield Frame
   - [ ] Different Materials for Moving/Freezing/Finalized Blocks
-- [ ] T-spin and All Clear detection
+  - [ ] Clear effects
 - [ ] Game Modes
   - [ ] 40 Lines Sprint
   - [ ] Marathon
 - [x] Sound effects
+- [ ] Gameplay Polishing
+  - [ ] Guideline lock delay
+  - [ ] T-spin and All Clear detection
+  - [ ] [ARE (spawn delay)](https://harddrop.com/wiki/ARE)
+  - [ ] [IRS](https://harddrop.com/wiki/IRS#IRS)
+  - [ ] Line clear delay
 
 Try online [here](https://quadtris.chocole.top)
 
