@@ -8,6 +8,40 @@ use macroquad::prelude::*;
 
 use crate::constants::{ARR_DEFAULT, DAS_DEFAULT, SOFT_DROP_DEFAULT};
 
+pub struct FrameTimer {
+    duration: f32,
+    left: f32,
+}
+
+impl FrameTimer {
+    pub fn new(duration: f32) -> Self {
+        Self {
+            duration,
+            left: duration,
+        }
+    }
+
+    pub fn tick(&mut self, frame: f32) {
+        self.left -= frame;
+    }
+
+    pub fn done(&self) -> bool {
+        self.left <= 0.
+    }
+
+    pub fn reset(&mut self) {
+        self.left = self.duration
+    }
+
+    pub fn get_duration(&self) -> f32 {
+        self.duration
+    }
+
+    pub fn get_duration_mut(&mut self) -> &mut f32 {
+        &mut self.duration
+    }
+}
+
 #[derive(PartialEq, Eq)]
 pub enum GameState {
     Menu,
@@ -77,13 +111,12 @@ pub struct GameData {
     pub curr_piece: Option<PieceWithPosition>,
 
     pub gravity: f32,
-    pub das: f32,
-    pub das_left: f32,
     pub arr: f32,
     pub soft_drop_gravity: f32,
-    pub freeze_delay: f32,
+    pub das_timer: FrameTimer,
+    pub freeze_timer: FrameTimer,
+    pub spawn_delay_timer: FrameTimer,
 
-    pub freeze_left: f32,
     pub accumulated_down: f32,
     pub accumulated_move: f32,
     pub move_state: MoveState,
@@ -93,7 +126,7 @@ pub struct GameData {
     pub time: f32,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum MoveState {
     Left,
     Right,
@@ -113,11 +146,10 @@ impl GameData {
             soft_drop_gravity: SOFT_DROP_DEFAULT,
             accumulated_down: 0.,
 
-            freeze_delay: 120.,
-            freeze_left: 120.,
+            freeze_timer: FrameTimer::new(200.),
+            spawn_delay_timer: FrameTimer::new(10.),
 
-            das: DAS_DEFAULT,
-            das_left: DAS_DEFAULT,
+            das_timer: FrameTimer::new(DAS_DEFAULT),
 
             arr: ARR_DEFAULT,
             accumulated_move: 0.,
@@ -138,6 +170,9 @@ impl GameData {
     }
 
     pub fn start(&mut self) {
+        self.das_timer.reset();
+        self.freeze_timer.reset();
+        self.spawn_delay_timer.tick(99999.);
         self.state = GameState::Playing;
         self.piece_bag = Some(PieceBag::new(6, Some((get_time() * 1000.) as u64)));
         self.gravity = 0.0156;
@@ -169,8 +204,11 @@ pub fn load_user_settings(game_data: &mut GameData) {
     if let Ok(user_settings) = UserSettings::deserialize_json(&json) {
         override_if_some!(game_data, user_settings, keybind);
         override_if_some!(game_data, user_settings, arr);
-        override_if_some!(game_data, user_settings, das);
         override_if_some!(game_data, user_settings, soft_drop_gravity);
+
+        if let Some(value) = user_settings.das {
+            *game_data.das_timer.get_duration_mut() = value;
+        }
     }
 }
 
@@ -181,7 +219,7 @@ pub fn save_user_settings(game_data: &GameData) {
         &UserSettings {
             keybind: Some(game_data.keybind.clone()),
             arr: Some(game_data.arr),
-            das: Some(game_data.das),
+            das: Some(game_data.das_timer.get_duration()),
             soft_drop_gravity: Some(game_data.soft_drop_gravity),
         }
         .serialize_json(),

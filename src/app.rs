@@ -78,17 +78,23 @@ impl App {
 
                 self.game_data.time += get_frame_time();
 
-                if self.game_data.curr_piece.is_some() {
-                    self.handle_move();
-                    self.handle_hold();
-                    self.handle_rotate();
-                    self.handle_gravity();
-                    self.handle_freeze();
-                } else if let Some(p) = self.spawn_piece() {
-                    self.game_data.curr_piece = Some(p);
-                } else {
-                    self.game_over();
+                if self.game_data.curr_piece.is_none() {
+                    self.game_data.spawn_delay_timer.tick(relative_frame());
+                    if self.game_data.spawn_delay_timer.done() {
+                        if let Some(p) = self.spawn_piece() {
+                            self.game_data.curr_piece = Some(p);
+                        } else {
+                            self.game_over();
+                        }
+                        self.game_data.spawn_delay_timer.reset();
+                    }
                 }
+
+                self.handle_move();
+                self.handle_hold();
+                self.handle_rotate();
+                self.handle_gravity();
+                self.handle_freeze();
             }
             GameState::GameOver => {
                 if self.game_data.keybind.restart.is_pressed() {
@@ -156,7 +162,7 @@ impl App {
 
                 menu.add_widget(Selector::new(
                     "DAS",
-                    &mut self.game_data.das,
+                    self.game_data.das_timer.get_duration_mut(),
                     &DAS_VALUES,
                     &DAS_LABELS,
                 ));
@@ -229,42 +235,43 @@ impl App {
 
     fn handle_freeze(&mut self) {
         let Some(piece) = &mut self.game_data.curr_piece else {return};
+        let freeze_timer = &mut self.game_data.freeze_timer;
         if piece.collides_down(&self.game_data.board) {
-            self.game_data.freeze_left -= relative_frame();
-            if self.game_data.freeze_left < 0. {
+            freeze_timer.tick(relative_frame());
+            if freeze_timer.done() {
                 self.freeze_piece();
             }
         } else {
-            self.game_data.freeze_left = self.game_data.freeze_delay;
+            freeze_timer.reset();
         }
     }
 
     fn handle_move(&mut self) {
-        let Some(piece) = &mut self.game_data.curr_piece else {return};
-
         if self.game_data.keybind.hard_drop.is_pressed() {
             self.hard_drop();
             return;
         }
 
-        if self.game_data.keybind.left.is_pressed() {
-            piece_move_step(
-                piece,
-                MoveState::Left,
-                1,
-                &self.game_data.board,
-                &self.sounds,
-            );
+        let first_move = if self.game_data.keybind.left.is_pressed() {
             self.change_move_state(MoveState::Left);
+            true
         } else if self.game_data.keybind.right.is_pressed() {
-            piece_move_step(
-                piece,
-                MoveState::Right,
-                1,
-                &self.game_data.board,
-                &self.sounds,
-            );
             self.change_move_state(MoveState::Right);
+            true
+        } else {
+            false
+        };
+
+        if let Some(piece) = &mut self.game_data.curr_piece {
+            if first_move {
+                piece_move_step(
+                    piece,
+                    self.game_data.move_state,
+                    1,
+                    &self.game_data.board,
+                    &self.sounds,
+                );
+            }
         }
 
         match self.game_data.move_state {
@@ -335,25 +342,26 @@ impl App {
 
     fn change_move_state(&mut self, state: MoveState) {
         self.game_data.move_state = state;
-        self.game_data.das_left = self.game_data.das;
+        self.game_data.das_timer.reset();
         self.game_data.accumulated_move = 0.;
     }
 
     fn handle_das(&mut self) {
-        let Some(piece) = &mut self.game_data.curr_piece else {return};
-        if self.game_data.das_left <= 0. {
+        if self.game_data.das_timer.done() {
             self.game_data.accumulated_move += relative_frame() / self.game_data.arr.max(0.000001);
-            let step = self.game_data.accumulated_move.floor() as usize;
-            self.game_data.accumulated_move = self.game_data.accumulated_move.fract();
-            piece_move_step(
-                piece,
-                self.game_data.move_state,
-                step,
-                &self.game_data.board,
-                &self.sounds,
-            );
+            if let Some(piece) = &mut self.game_data.curr_piece {
+                let step = self.game_data.accumulated_move.floor() as usize;
+                self.game_data.accumulated_move = self.game_data.accumulated_move.fract();
+                piece_move_step(
+                    piece,
+                    self.game_data.move_state,
+                    step,
+                    &self.game_data.board,
+                    &self.sounds,
+                );
+            }
         } else {
-            self.game_data.das_left -= relative_frame();
+            self.game_data.das_timer.tick(relative_frame());
         }
     }
 
@@ -400,7 +408,7 @@ impl App {
         piece.finalize_on(&mut self.game_data.board);
 
         self.game_data.curr_piece = None;
-        self.game_data.freeze_left = self.game_data.freeze_delay;
+        self.game_data.freeze_timer.reset();
 
         self.sounds.mino_lock.play();
         self.handle_clear();
