@@ -13,7 +13,7 @@ use super::{
 };
 use lazy_static::lazy_static;
 
-const HOLD_NEXT_PRIMARY_SCALE: f32 = 0.75;
+const HOLD_NEXT_PRIMARY_SCALE: f32 = 0.8;
 const HOLD_NEXT_SECONDARY_SCALE: f32 = 0.5;
 
 pub fn render_board(
