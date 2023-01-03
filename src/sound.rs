@@ -19,11 +19,11 @@ impl SoundAssets {
     pub async fn new() -> Self {
         Self {
             mino_spawn: Box::new(RoundRobinSounds::new(MINO_SPAWN.clone()).await),
-            mino_lock: Box::new(SingleSound::new(MINO_LOCK).await),
-            mino_touch_ground: Box::new(SingleSound::new(MINO_TOUCH_GROUND).await),
-            mino_clear: Box::new(SingleSound::new(MINO_CLEAR).await),
-            mino_hold: Box::new(SingleSound::new(MINO_HOLD).await),
-            mino_holdfail: Box::new(SingleSound::new(MINO_HOLDFAIL).await),
+            mino_lock: Box::new(SingleSound::new(MINO_LOCK.into()).await),
+            mino_touch_ground: Box::new(SingleSound::new(MINO_TOUCH_GROUND.into()).await),
+            mino_clear: Box::new(SingleSound::new(MINO_CLEAR.into()).await),
+            mino_hold: Box::new(SingleSound::new(MINO_HOLD.into()).await),
+            mino_holdfail: Box::new(SingleSound::new(MINO_HOLDFAIL.into()).await),
         }
     }
 }
@@ -37,8 +37,8 @@ pub struct SingleSound {
 }
 
 impl SingleSound {
-    pub async fn new(path: &str) -> Self {
-        let sound = audio::load_sound(path).await.ok();
+    pub async fn new(path: String) -> Self {
+        let sound = audio::load_sound(&path).await.ok();
         if sound.is_none() {
             logging::warn!("Can't load {}", path);
         }
@@ -66,9 +66,17 @@ pub struct RoundRobinSounds {
 impl RoundRobinSounds {
     pub async fn new(paths: Vec<String>) -> Self {
         let mut sounds = vec![];
-        for p in paths {
-            let s = SingleSound::new(&p).await;
-            if s.is_some() {
+
+        let coroutine_vec: Vec<_> = paths
+            .into_iter()
+            .map(|p| coroutines::start_coroutine(SingleSound::new(p)))
+            .collect();
+
+        for c in coroutine_vec {
+            while !c.is_done() {
+                next_frame().await;
+            }
+            if let Some(s) = c.retrieve() {
                 sounds.push(s);
             }
         }
