@@ -64,7 +64,7 @@ fn impl_asset_collection(ast: DeriveInput) -> proc_macro2::TokenStream {
         }
     }
 
-    let load_assets = assets.iter().fold(quote!(), |token_stream, asset| {
+    let start_coroutines = assets.iter().fold(quote!(), |token_stream, asset| {
         let ident = &asset.ident;
         let load_function = match &asset.ty {
             AssetType::File(path) => quote! {
@@ -89,6 +89,14 @@ fn impl_asset_collection(ast: DeriveInput) -> proc_macro2::TokenStream {
         quote! {
             #token_stream
             let #ident = coroutines::start_coroutine(#load_function);
+        }
+    });
+
+    let retrieve_results = assets.iter().fold(quote!(), |token_stream, asset| {
+        let ident = &asset.ident;
+
+        quote! {
+            #token_stream
             let #ident = loop {
                 if #ident.is_done() {
                     break #ident.retrieve().unwrap().expect("Load asset #ident failed");
@@ -111,7 +119,8 @@ fn impl_asset_collection(ast: DeriveInput) -> proc_macro2::TokenStream {
     quote! {
         impl #name {
             pub async fn load() -> Self {
-                #load_assets
+                #start_coroutines
+                #retrieve_results
                 Self {
                     #assign_fields
                 }
