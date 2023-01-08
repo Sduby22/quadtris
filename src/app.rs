@@ -7,11 +7,12 @@ use rust_tetris_core::{
 };
 
 use crate::{
+    asset::Assets,
     constants::MENU_POS,
     game_data::{load_user_settings, save_user_settings, GameData, GameState, MoveState},
     menu::*,
     renderer::{text, Renderer},
-    sound::SoundAssets, asset::Assets
+    sound::SoundAssets,
 };
 
 pub struct App {
@@ -20,16 +21,14 @@ pub struct App {
     sounds: SoundAssets,
     menu_ctx: MenuCtx,
     time_elapsed: f32,
-    assets: Assets
+    assets: Assets,
 }
 
 impl App {
     pub async fn new() -> App {
-        // build_textures_atlas();
         let assets = Assets::load().await;
 
         let renderer = Renderer::from(&assets);
-        // let renderer = Renderer::new().await;
         let sounds = SoundAssets::from(&assets);
         let mut game_data = GameData::new();
 
@@ -41,7 +40,7 @@ impl App {
             sounds,
             menu_ctx: MenuCtx::new(),
             time_elapsed: 0.,
-            assets
+            assets,
         }
     }
 

@@ -115,7 +115,6 @@ fn impl_asset_collection(ast: DeriveInput) -> proc_macro2::TokenStream {
         }
     });
 
-
     quote! {
         impl #name {
             pub async fn load() -> Self {

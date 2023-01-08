@@ -32,19 +32,6 @@ impl From<&Assets> for Renderer {
 }
 
 impl Renderer {
-    pub async fn new() -> Self {
-        let block_img = load_image(BLOCK_PATH).await.unwrap();
-        let block_renderer = block::BlockRenderer::new(block_img);
-
-        let text_img = load_image(FONT_PATH).await.unwrap();
-        let text_renderer = text::TextRenderer::new(text_img);
-
-        Self {
-            block_renderer,
-            text_renderer,
-        }
-    }
-
     pub fn render(&self, game_data: &GameData) {
         clear_background(Color::from_rgba(10, 10, 10, 255));
         self.setup_camera();

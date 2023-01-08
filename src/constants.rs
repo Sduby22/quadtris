@@ -42,18 +42,5 @@ pub const SOFT_DROP_DEFAULT: f32 = 0.5;
 
 /// Assets
 
-pub const FONT_PATH: &str = "res/graphics/font_big_sheet.png";
-pub const BLOCK_PATH: &str = "res/graphics/blockskin/big/b2-sheet.png";
-
-lazy_static! {
-    pub static ref MINO_SPAWN: Vec<String> =
-        (0..=7).map(|d| format!("res/se/piece{}.wav", d)).collect();
-}
-pub const MINO_LOCK: &str = "res/se/lock.wav";
-pub const MINO_TOUCH_GROUND: &str = "res/se/move.wav";
-pub const MINO_CLEAR: &str = "res/se/erase1.wav";
-pub const MINO_HOLD: &str = "res/se/hold.wav";
-pub const MINO_HOLDFAIL: &str = "res/se/holdfail.wav";
-
 pub const FIELD_COLS: usize = 10;
 pub const FIELD_ROWS: usize = 20;

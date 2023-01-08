@@ -1,4 +1,3 @@
-
 #[derive(MyDerive)]
 struct Foo {
     #[asset(path = "asd", File)]

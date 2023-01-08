@@ -314,15 +314,15 @@ impl<'a> Label<'a> {
 }
 
 impl<'a> MenuWidget for Label<'a> {
-    fn draw(&self, position: Vec2, text_renderer: &TextRenderer, ctx: &MenuCtx) {
+    fn draw(&self, position: Vec2, text_renderer: &TextRenderer, _ctx: &MenuCtx) {
         text_renderer.draw_text(self.text, position, FONT_SIZE, self.color);
     }
 
-    fn handle_input(&mut self, ctx: &mut MenuCtx) {}
+    fn handle_input(&mut self, _ctx: &mut MenuCtx) {}
 
     fn get_height(&self) -> f32 {
         FONT_SIZE
     }
 
-    fn insert_menu(&mut self, id: i32) {}
+    fn insert_menu(&mut self, _id: i32) {}
 }
