@@ -419,6 +419,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "macroquad_asset_loader"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "macroquad_macro"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -767,6 +776,7 @@ dependencies = [
  "egui-macroquad",
  "lazy_static",
  "macroquad",
+ "macroquad_asset_loader",
  "nanoserde",
  "quad-storage",
  "rust_tetris_core",

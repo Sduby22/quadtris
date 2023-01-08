@@ -1,3 +1,4 @@
+use crate::asset::Assets;
 use crate::constants::*;
 use crate::game_data::{GameData, GameState};
 use macroquad::prelude::*;
@@ -16,6 +17,18 @@ pub mod utils;
 pub struct Renderer {
     pub block_renderer: block::BlockRenderer,
     pub text_renderer: text::TextRenderer,
+}
+
+impl From<&Assets> for Renderer {
+    fn from(assets: &Assets) -> Self {
+        let block_renderer = block::BlockRenderer::new(assets.block_img.clone());
+        let text_renderer = text::TextRenderer::new(assets.text_img.clone());
+
+        Self {
+            block_renderer,
+            text_renderer,
+        }
+    }
 }
 
 impl Renderer {

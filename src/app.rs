@@ -11,7 +11,7 @@ use crate::{
     game_data::{load_user_settings, save_user_settings, GameData, GameState, MoveState},
     menu::*,
     renderer::{text, Renderer},
-    sound::SoundAssets,
+    sound::SoundAssets, asset::Assets
 };
 
 pub struct App {
@@ -20,14 +20,17 @@ pub struct App {
     sounds: SoundAssets,
     menu_ctx: MenuCtx,
     time_elapsed: f32,
+    assets: Assets
 }
 
 impl App {
     pub async fn new() -> App {
         // build_textures_atlas();
-        let renderer = Renderer::new().await;
+        let assets = Assets::load().await;
 
-        let sounds = SoundAssets::new().await;
+        let renderer = Renderer::from(&assets);
+        // let renderer = Renderer::new().await;
+        let sounds = SoundAssets::from(&assets);
         let mut game_data = GameData::new();
 
         load_user_settings(&mut game_data);
@@ -38,6 +41,7 @@ impl App {
             sounds,
             menu_ctx: MenuCtx::new(),
             time_elapsed: 0.,
+            assets
         }
     }
 
