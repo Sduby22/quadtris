@@ -2,6 +2,8 @@
 
 A Modern Tetris game built with Rust using [Macroquad](https://macroquad.rs/).
 
+Try online [here](https://quadtris.chocole.top)
+
 Features:
 
 - [x] [SRS (Super Rotation System)](https://harddrop.com/wiki/SRS)
@@ -23,7 +25,6 @@ Features:
   - [x] [IRS](https://harddrop.com/wiki/IRS#IRS)
   - [ ] Line clear delay
 
-Try online [here](https://quadtris.chocole.top)
 
 [output.webm](https://user-images.githubusercontent.com/29040696/209563673-65858886-696c-4b2f-95ce-931978e69607.webm)
 
