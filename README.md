@@ -2,7 +2,7 @@
 
 A Modern Tetris game built with Rust using [Macroquad](https://macroquad.rs/).
 
-Try online [here](https://quadtris.401770.xyz)
+**Try online [here](https://quadtris.401770.xyz)**
 
 Features:
 
